@@ -1,0 +1,4 @@
+URL=http://code.suckless.org/hg/9base
+TYPE=hg
+DESC="plan9 tools for unix"
+DEPS=

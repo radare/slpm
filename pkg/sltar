@@ -1,0 +1,3 @@
+TYPE=hg
+URL=http://s01.de/~gottox/hg/sltar
+DESC="Suckless tar replacement"

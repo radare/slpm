@@ -1,0 +1,132 @@
+#!/bin/sh
+# suckless package manager '2009 -- pancake // nopcode dot org
+
+function whereami {
+  for a in $PWD `echo $PATH | sed -s 's,:, ,g'` ; do
+    if [ -e "$a/$1" ]; then
+      echo "$a/$1"
+      break
+    fi
+  done
+  echo $1
+}
+BIN="`readlink $0`"
+[ -z "${BIN}" ] && BIN=$0
+ARG0="`whereami $BIN`"
+ROOT="`dirname $ARG0`"
+WRKDIR="${ROOT}/_work"
+PKGDIR="${ROOT}/pkg"
+DESTDIR="${ROOT}/_prefix"
+PREFIX="/"
+NFODIR="${DESTDIR}/${PREFIX}/var/lib/slpm/pkg"
+
+function hg_fetch {
+  mkdir -p $WRKDIR
+  cd $WRKDIR
+  if [ -d "$1" ]; then
+    if [ "$3" = 1 ]; then
+      echo "==> hg: updating $1 ..."
+      ( cd "$1" ; hg pull && hg up )
+    fi
+  else
+    echo "==> hg: fetching $1 from $2 ..."
+    hg clone "$2" "$1"
+  fi
+}
+
+function tar_fetch {
+  FILE="`basename $URL`"
+  cd "$WRKDIR"
+  if [ -f "$WRKDIR/$FILE" ]; then
+    echo "==> Already downloaded $FILE"
+  else
+    wget -c $URL
+  fi
+  if [ -d "$WRKDIR/$PKG" ]; then
+    echo "==> Already uncompressed and patched $PKG"
+  else
+    tar xzvf $FILE
+  fi
+}
+
+function pkg_fetch {
+  eval ${TYPE}_fetch $PKG $URL $1
+}
+
+
+function pkg_update {
+  hg_fetch $PKG $URL
+}
+
+function pkg_build {
+  cd "$WRKDIR/$PKG"
+  make "DESTDIR=${DESTDIR}" PREFIX=${PREFIX}
+}
+
+function pkg_install {
+  cd "$WRKDIR/$PKG"
+  make install DESTDIR=${DESTDIR} PREFIX=${PREFIX}
+  mkdir -p "$NFODIR/$PKG"
+  #( cd $PREFIX ; find * > $NFODIR/$PKG/newfind )
+  #diff -u "$NFODIR/$PKG/oldfind" "$NFODIR/$PKG/newfind"
+}
+
+function pkg_clean {
+  cd "$WRKDIR/$PKG"
+  make clean
+}
+
+function pkg_deinstall {
+  cd "$WRKDIR/$PKG"
+  make uninstall DESTDIR=${DESTDIR} PREFIX=${PREFIX}
+  rmdir "$NFODIR/$PKG"
+}
+
+function help {
+  echo "Usage: slpm [-iudlL] [pkg pkg ..]"
+  echo " -u : upgrade package"
+  echo " -i : install package"
+  echo " -d : deinstall package"
+  echo " -c : clean package"
+  echo " -s : enter shell"
+  echo " -l : list installed packages or pkg files"
+  echo " -L : list all available packages"
+  exit 1
+}
+
+[ ! -d "${NFODIR}" ] && mkdir -p "${NFODIR}"
+
+DO=
+while [ -n "$1" ]; do
+  case "$1" in
+  -c|-i|-u|-d) DO=$1 ; ;;
+  "-s")
+    sudo chroot ${PREFIX} /bin/rc
+    exit 0
+    ;;
+  "-L") ls ${PKGDIR} | cat ; exit 0 ; ;;
+  "-l")
+    if [ -z "$2" ]; then
+      ls "$NFODIR" | cat ; exit 0
+    else
+      cat "$NFODIR/$2/files" ; exit 0
+    fi
+    ;;
+  *) break
+  esac
+  shift
+done
+
+[ -z "$1" ] && help
+while [ -f "${PKGDIR}/$1" ] ; do
+  PKG=$1
+  . "${PKGDIR}/$1"
+  case $DO in
+  -c) (pkg_clean) ; ;;
+  -i) (pkg_fetch) ; (pkg_build) ; (pkg_install) ; ;;
+  -u) (pkg_fetch 1) ; (pkg_install) ; ;;
+  -d) (pkg_deinstall) ; ;;
+  *) (pkg_fetch) ; ;;
+  esac
+  shift
+done
