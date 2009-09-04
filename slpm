@@ -16,8 +16,7 @@ ARG0="`whereami $BIN`"
 ROOT="`dirname $ARG0`"
 WRKDIR="${ROOT}/_work"
 PKGDIR="${ROOT}/pkg"
-DESTDIR="${ROOT}/_prefix"
-PREFIX="/"
+. "${ROOT}/config"
 NFODIR="${DESTDIR}/${PREFIX}/var/lib/slpm/pkg"
 
 function hg_fetch {
@@ -29,8 +28,19 @@ function hg_fetch {
       ( cd "$1" ; hg pull && hg up )
     fi
   else
-    echo "==> hg: fetching $1 from $2 ..."
     hg clone "$2" "$1"
+  fi
+}
+
+function git_fetch {
+  mkdir -p $WRKDIR
+  cd $WRKDIR
+  if [ -d "$1" ]; then
+    if [ "$3" = 1 ]; then
+      ( cd "$1" ; git pull )
+    fi
+  else
+    git clone "$2" "$1"
   fi
 }
 
@@ -53,7 +63,6 @@ function pkg_fetch {
   eval ${TYPE}_fetch $PKG $URL $1
 }
 
-
 function pkg_update {
   hg_fetch $PKG $URL
 }
@@ -64,11 +73,24 @@ function pkg_build {
 }
 
 function pkg_install {
+  (
+    cd "$WRKDIR/$PKG"
+    make install DESTDIR=${DESTDIR} PREFIX=${PREFIX}
+  )
+  pkg_register
+}
+
+function pkg_register {
+  [ -d "$NFODIR/$PKG" ] && return
   cd "$WRKDIR/$PKG"
-  make install DESTDIR=${DESTDIR} PREFIX=${PREFIX}
+  mkdir -p "${WRKDIR}/.tmp/${PKG}"
+  make install "PREFIX=${WRKDIR}/.tmp/${PKG}"
+  # go register
   mkdir -p "$NFODIR/$PKG"
-  #( cd $PREFIX ; find * > $NFODIR/$PKG/newfind )
-  #diff -u "$NFODIR/$PKG/oldfind" "$NFODIR/$PKG/newfind"
+  cd "${WRKDIR}/.tmp/${PKG}"
+  find * > "$NFODIR/$PKG/files"
+  date > "$NFODIR/$PKG/date"
+  rm -rf "${WRKDIR}/.tmp/${PKG}"
 }
 
 function pkg_clean {
@@ -77,9 +99,16 @@ function pkg_clean {
 }
 
 function pkg_deinstall {
-  cd "$WRKDIR/$PKG"
-  make uninstall DESTDIR=${DESTDIR} PREFIX=${PREFIX}
-  rmdir "$NFODIR/$PKG"
+  if [ -e "$NFODIR/$PKG/files" ]; then
+    cd "${DESTDIR}/${PREFIX}"
+    for a in `cat $NFODIR/$PKG/files`; do
+      [ -f "$a" ] && echo "$a" && rm -f "$a"
+    done
+    rm -rf "$NFODIR/$PKG"
+  else
+    cd "$WRKDIR/$PKG"
+    make uninstall DESTDIR=${DESTDIR} PREFIX=${PREFIX}
+  fi
 }
 
 function help {
@@ -88,7 +117,7 @@ function help {
   echo " -i : install package"
   echo " -d : deinstall package"
   echo " -c : clean package"
-  echo " -s : enter shell"
+  echo " -s : search"
   echo " -l : list installed packages or pkg files"
   echo " -L : list all available packages"
   exit 1
@@ -101,7 +130,11 @@ while [ -n "$1" ]; do
   case "$1" in
   -c|-i|-u|-d) DO=$1 ; ;;
   "-s")
-    sudo chroot ${PREFIX} /bin/rc
+    if [ -z "$2" ]; then
+      echo "Usage: slpm -s [keyword]"
+    else
+      cd ${PKGDIR} && grep DESC * | grep -i "$2"
+    fi
     exit 0
     ;;
   "-L") ls ${PKGDIR} | cat ; exit 0 ; ;;

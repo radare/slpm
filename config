@@ -1,0 +1,3 @@
+DESTDIR=""
+PREFIX="${ROOT}/_prefix"
+#PREFIX="/usr"
