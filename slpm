@@ -157,7 +157,7 @@ while [ -f "${PKGDIR}/$1" ] ; do
   case $DO in
   -c) (pkg_clean) ; ;;
   -i) (pkg_fetch) ; (pkg_build) ; (pkg_install) ; ;;
-  -u) (pkg_fetch 1) ; (pkg_install) ; ;;
+  -u) (pkg_fetch 1) ; (pkg_build) ; (pkg_install) ; ;;
   -d) (pkg_deinstall) ; ;;
   *) (pkg_fetch) ; ;;
   esac
