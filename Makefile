@@ -4,4 +4,4 @@ DESTDIR?=
 all:
 
 install:
-	ln -s $${PWD}/slpm ${DESTDIR}${PREFIX}/bin/slpm
+	ln -fs $${PWD}/slpm ${DESTDIR}${PREFIX}/bin/slpm

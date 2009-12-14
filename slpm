@@ -68,11 +68,19 @@ function pkg_update {
 }
 
 function pkg_build {
+  if [ ! -d "$WRKDIR/$PKG" ]; then
+    echo "pkg_build: Cannot open target directory"
+    exit 1
+  fi
   cd "$WRKDIR/$PKG"
   make "DESTDIR=${DESTDIR}" PREFIX=${PREFIX}
 }
 
 function pkg_install {
+  if [ ! -d "$WRKDIR/$PKG" ]; then
+    echo "pkg_install: Cannot open target directory"
+    exit 1
+  fi
   (
     cd "$WRKDIR/$PKG"
     make install DESTDIR=${DESTDIR} PREFIX=${PREFIX}
