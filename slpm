@@ -96,7 +96,7 @@ function pkg_register {
   # go register
   mkdir -p "$NFODIR/$PKG"
   cd "${WRKDIR}/.tmp/${PKG}"
-  find * > "$NFODIR/$PKG/files"
+  find * -type f > "$NFODIR/$PKG/files"
   date > "$NFODIR/$PKG/date"
   rm -rf "${WRKDIR}/.tmp/${PKG}"
 }

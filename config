@@ -1,3 +1,10 @@
+# Configuration shellscript for slpm
+
 DESTDIR=""
 PREFIX="${ROOT}/_prefix"
 #PREFIX="/usr"
+
+CFLAGS="-O2 -Wall"
+LDFLAGS="-static"
+
+export CFLAGS LDFLAGS
