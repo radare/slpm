@@ -2,7 +2,7 @@
 # suckless package manager '2009 -- pancake // nopcode dot org
 
 function whereami {
-  for a in $PWD `echo $PATH | sed -s 's,:, ,g'` ; do
+  for a in $PWD `echo $PATH | sed 's,:, ,g'` ; do
     if [ -e "$a/$1" ]; then
       echo "$a/$1"
       break
@@ -12,6 +12,7 @@ function whereami {
 }
 BIN="`readlink $0`"
 [ -z "${BIN}" ] && BIN=$0
+[ -z "${SHELL}" ] && BIN=/bin/sh
 ARG0="`whereami $BIN`"
 ROOT="`dirname $ARG0`"
 WRKDIR="${ROOT}/_work"
@@ -121,11 +122,12 @@ function pkg_deinstall {
 
 function help {
   echo "Usage: slpm [-iudlL] [pkg pkg ..]"
+  echo " -  : helper to use the prefix PATH eval \$(slpm -)"
   echo " -u : upgrade package"
   echo " -i : install package"
   echo " -d : deinstall package"
   echo " -c : clean package"
-  echo " -s : search"
+  echo " -s : search package by keyword"
   echo " -l : list installed packages or pkg files"
   echo " -L : list all available packages"
   exit 1
@@ -136,8 +138,11 @@ function help {
 DO=
 while [ -n "$1" ]; do
   case "$1" in
+  -) echo "PATH=${PREFIX}/bin:${PREFIX}/sbin:${PATH}; export PATH"
+     exit 0 ;;
+  -h) help ; ;;
   -c|-i|-u|-d) DO=$1 ; ;;
-  "-s")
+  -s)
     if [ -z "$2" ]; then
       echo "Usage: slpm -s [keyword]"
     else
@@ -145,15 +150,16 @@ while [ -n "$1" ]; do
     fi
     exit 0
     ;;
-  "-L") ls ${PKGDIR} | cat ; exit 0 ; ;;
-  "-l")
+  -L) ls ${PKGDIR} | cat ; exit 0 ; ;;
+  -l)
     if [ -z "$2" ]; then
       ls "$NFODIR" | cat ; exit 0
     else
       cat "$NFODIR/$2/files" ; exit 0
     fi
     ;;
-  *) break
+  -*) echo "Unknown flag '$1'" ;;
+  *) break ;;
   esac
   shift
 done

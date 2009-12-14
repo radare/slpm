@@ -1,1 +1,2 @@
 * A centralized way to maintain config files for all the packages
+* eval $(slpm -) - to enter environment
