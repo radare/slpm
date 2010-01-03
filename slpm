@@ -126,7 +126,7 @@ function pkg_deinstall {
 }
 
 function help {
-  echo "Usage: slpm [-iudlL] [pkg pkg ..]"
+  echo "Usage: slpm [-iudlLx] [pkg pkg ..]"
   echo " -x : execute or enter into the slpm shell"
   echo " -u : upgrade package"
   echo " -i : install package"
@@ -153,9 +153,12 @@ while [ -n "$1" ]; do
      fi
      PATH=${PREFIX}/bin:${PREFIX}/sbin:${PATH}
      MANPATH=${PREFIX}/share/man:${MANPATH}
+     LD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
+     PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
      unset PROMPT_COMMAND
-     export PATH MANPATH
-     exec ${SHELL}
+     export PATH MANPATH LD_LIBRARY_PATH PKG_CONFIG_PATH
+     shift
+     exec ${SHELL} $@
      ;;
   -h) help ; ;;
   -c|-i|-u|-d) DO=$1 ; ;;
