@@ -1,3 +1,4 @@
 * a centralized way to maintain config files for all the packages
 * eval $(slpm -) - to enter environment
 * add timestamp when installing
+* 9base has some warnings. push patch

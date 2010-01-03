@@ -127,7 +127,7 @@ function pkg_deinstall {
 
 function help {
   echo "Usage: slpm [-iudlL] [pkg pkg ..]"
-  echo " -  : helper to use the prefix PATH eval \$(slpm -)"
+  echo " -x : execute or enter into the slpm shell"
   echo " -u : upgrade package"
   echo " -i : install package"
   echo " -d : deinstall package"
@@ -143,8 +143,20 @@ function help {
 DO=
 while [ -n "$1" ]; do
   case "$1" in
-  -) echo "PATH=${PREFIX}/bin:${PREFIX}/sbin:${PATH}; export PATH"
-     exit 0 ;;
+  -x)
+     SHELL=""
+     [ -x "${PREFIX}/bin/sh" ] && SHELL="${PREFIX}/bin/sh"
+     [ -x "${PREFIX}/bin/rc" ] && SHELL="${PREFIX}/bin/rc"
+     if [ -z "${SHELL}" ]; then
+       echo "Cannot find shell. Please install busybox or 9base"
+       exit 1
+     fi
+     PATH=${PREFIX}/bin:${PREFIX}/sbin:${PATH}
+     MANPATH=${PREFIX}/share/man:${MANPATH}
+     unset PROMPT_COMMAND
+     export PATH MANPATH
+     exec ${SHELL}
+     ;;
   -h) help ; ;;
   -c|-i|-u|-d) DO=$1 ; ;;
   -s)
