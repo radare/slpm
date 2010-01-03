@@ -1,0 +1,3 @@
+URL=ftp://ftp.cs.mun.ca/pub/pdksh/pdksh-5.2.14.tar.gz
+TYPE=tar
+DESC="public domain clone of the AT&T Korn shell"

@@ -1,5 +1,5 @@
 #!/bin/sh
-# suckless package manager '2009-2010
+# suckless package manager @ 2009-2010
 # - pancake at nopcode dot org
 
 function whereami {
@@ -13,7 +13,7 @@ function whereami {
 }
 BIN="`readlink $0`"
 [ -z "${BIN}" ] && BIN=$0
-[ -z "${SHELL}" ] && BIN=/bin/sh
+[ -z "${BIN}" ] && BIN=/bin/sh # XXX?
 ARG0="`whereami $BIN`"
 ROOT="`dirname $ARG0`"
 USRDIR="${HOME}/.slpm"
@@ -58,7 +58,10 @@ function tar_fetch {
   if [ -d "$WRKDIR/$PKG" ]; then
     echo "==> Already uncompressed and patched $PKG"
   else
-    tar xzvf $FILE
+    case "$FILE" in
+    *gz*) tar xzvf $FILE ; ;;
+    *bz2*) tar xjvf $FILE ; ;;
+    esac
   fi
 }
 
@@ -70,26 +73,37 @@ function pkg_update {
   hg_fetch $PKG $URL
 }
 
+function pkg_check {
+  if [ ! -f "$PKGDIR/$PKG" ]; then
+    echo "Cannot find $PKG"
+    exit 1
+  fi
+}
+
 function pkg_build {
   if [ ! -d "$WRKDIR/$PKG" ]; then
     echo "pkg_build: Cannot open target directory"
     exit 1
   fi
-  cd "$WRKDIR/$PKG"
+  cd "$WRKDIR/$PKG/${BASEDIR}"
+  if [ -n "${PKGCONFIGURE}" ]; then
+    ${PKGCONFIGURE}
+  else
   if [ -x "configure" ]; then
     ./configure "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
   fi
-  make "DESTDIR=${DESTDIR}" PREFIX=${PREFIX}
+  fi
+  make DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}
 }
 
 function pkg_install {
-  if [ ! -d "$WRKDIR/$PKG" ]; then
+  if [ ! -d "$WRKDIR/$PKG/${BASEDIR}" ]; then
     echo "pkg_install: Cannot open target directory"
     exit 1
   fi
   (
-    cd "$WRKDIR/$PKG"
-    make install DESTDIR=${DESTDIR} PREFIX=${PREFIX}
+    cd "$WRKDIR/$PKG/${BASEDIR}"
+    ${PKGINSTALL}
   )
   pkg_register
 }
@@ -98,10 +112,11 @@ function pkg_register {
   [ -d "$NFODIR/$PKG" ] && return
   cd "$WRKDIR/$PKG"
   mkdir -p "${WRKDIR}/.tmp/${PKG}"
-  make install "PREFIX=${WRKDIR}/.tmp/${PKG}"
+  ${PKGINSTALL} "DESTDIR=${WRKDIR}/.tmp/${PKG}" "prefix=${WRKDIR}/.tmp/${PKG}"
   # go register
   mkdir -p "$NFODIR/$PKG"
   cd "${WRKDIR}/.tmp/${PKG}"
+  echo "${WRKDIR}/.tmp/${PKG}"
   find * -type f > "$NFODIR/$PKG/files"
   date > "$NFODIR/$PKG/date"
   rm -rf "${WRKDIR}/.tmp/${PKG}"
@@ -121,6 +136,7 @@ function pkg_deinstall {
     rm -rf "$NFODIR/$PKG"
   else
     cd "$WRKDIR/$PKG"
+# TODO: wrap into ${PKGDEINSTALL}
     make uninstall DESTDIR=${DESTDIR} PREFIX=${PREFIX}
   fi
 }
@@ -138,28 +154,32 @@ function help {
   exit 1
 }
 
+function exec_shell {
+  SHELL=""
+  [ -x "${PREFIX}/bin/rc" ] && SHELL="${PREFIX}/bin/rc"
+  [ -x "${PREFIX}/bin/ksh" ] && SHELL="${PREFIX}/bin/ksh"
+  [ -x "${PREFIX}/bin/sh" ] && SHELL="${PREFIX}/bin/sh"
+  if [ -z "${SHELL}" ]; then
+    echo "Cannot find shell. Please install busybox or 9base"
+    exit 1
+  fi
+  PATH=${PREFIX}/bin:${PREFIX}/sbin:${PATH}
+  MANPATH=${PREFIX}/share/man:${MANPATH}
+  LD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
+  PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
+  unset PROMPT_COMMAND
+  export PATH MANPATH LD_LIBRARY_PATH PKG_CONFIG_PATH
+  shift
+  ${SHELL} $@
+  exit $?
+}
+
 [ ! -d "${NFODIR}" ] && mkdir -p "${NFODIR}"
 
 DO=
 while [ -n "$1" ]; do
   case "$1" in
-  -x)
-     SHELL=""
-     [ -x "${PREFIX}/bin/sh" ] && SHELL="${PREFIX}/bin/sh"
-     [ -x "${PREFIX}/bin/rc" ] && SHELL="${PREFIX}/bin/rc"
-     if [ -z "${SHELL}" ]; then
-       echo "Cannot find shell. Please install busybox or 9base"
-       exit 1
-     fi
-     PATH=${PREFIX}/bin:${PREFIX}/sbin:${PATH}
-     MANPATH=${PREFIX}/share/man:${MANPATH}
-     LD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
-     PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
-     unset PROMPT_COMMAND
-     export PATH MANPATH LD_LIBRARY_PATH PKG_CONFIG_PATH
-     shift
-     exec ${SHELL} $@
-     ;;
+  -x) exec_shell ; ;;
   -h) help ; ;;
   -c|-i|-u|-d) DO=$1 ; ;;
   -s)
@@ -190,9 +210,12 @@ function pkg_open {
   DESC=""
   DEPS=""
   CFGARGS=""
-  . "${PKGDIR}/$1"
-  if [ -e "${USRDIR}/$1" ]; then
-    . "${USRDIR}/$1"
+  BASEDIR=""
+  PKGINSTALL="make install DESTDIR=${DESTDIR} PREFIX=${PREFIX}"
+  PKGCONFIGURE=""
+  . "${PKGDIR}/$PKG"
+  if [ -e "${USRDIR}/$PKG" ]; then
+    . "${USRDIR}/$PKG"
   fi
   # TODO: check package variables
   if [ -z "${URL}" ]; then echo "No URL defined in package"; fi
@@ -200,9 +223,9 @@ function pkg_open {
 }
 
 [ -z "$1" ] && help
-while [ -f "${PKGDIR}/$1" ] ; do
+while [ -n "$1" ]; do
   PKG=$1
-  pkg_open "${PKG}"
+  pkg_check && pkg_open
   case $DO in
   -c) (pkg_clean) ; ;;
   -i) (pkg_fetch) ; (pkg_build) ; (pkg_install) ; ;;

@@ -1,0 +1,5 @@
+URL=git://git.busybox.net/busybox
+TYPE=git
+DESC="utilities for rescue and embedded systems"
+PKGCONFIGURE="make defconfig CONFIG_PREFIX=${PREFIX}"
+PKGINSTALL="make install && cp -rfa _install ${PREFIX}"
