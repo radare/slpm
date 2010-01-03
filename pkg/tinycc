@@ -1,0 +1,4 @@
+URL=git://repo.or.cz/tinycc.git
+TYPE=git
+DESC="tiny c compiler"
+DEPS=
