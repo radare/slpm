@@ -5,6 +5,10 @@ PREFIX="${ROOT}/_prefix"
 #PREFIX="/usr"
 
 CFLAGS="-O2 -Wall"
-LDFLAGS="-static"
+#LDFLAGS="-static"
 
-export CFLAGS LDFLAGS
+EXTRA_CFGARGS=""
+
+# TODO: user-defined-per-package cflags or extra-cfgargs
+
+export CFLAGS LDFLAGS EXTRA_CFGARGS

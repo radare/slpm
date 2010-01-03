@@ -34,8 +34,8 @@ function hg_fetch {
 }
 
 function git_fetch {
-  mkdir -p $WRKDIR
-  cd $WRKDIR
+  mkdir -p "$WRKDIR"
+  cd "$WRKDIR"
   if [ -d "$1" ]; then
     if [ "$3" = 1 ]; then
       ( cd "$1" ; git pull )
@@ -74,6 +74,9 @@ function pkg_build {
     exit 1
   fi
   cd "$WRKDIR/$PKG"
+  if [ -x "configure" ]; then
+    ./configure "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
+  fi
   make "DESTDIR=${DESTDIR}" PREFIX=${PREFIX}
 }
 
