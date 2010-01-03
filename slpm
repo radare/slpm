@@ -1,5 +1,6 @@
 #!/bin/sh
-# suckless package manager '2009 -- pancake // nopcode dot org
+# suckless package manager '2009-2010
+# - pancake at nopcode dot org
 
 function whereami {
   for a in $PWD `echo $PATH | sed 's,:, ,g'` ; do
@@ -15,6 +16,7 @@ BIN="`readlink $0`"
 [ -z "${SHELL}" ] && BIN=/bin/sh
 ARG0="`whereami $BIN`"
 ROOT="`dirname $ARG0`"
+USRDIR="${HOME}/.slpm"
 WRKDIR="${ROOT}/_work"
 PKGDIR="${ROOT}/pkg"
 . "${ROOT}/config"
@@ -167,10 +169,25 @@ while [ -n "$1" ]; do
   shift
 done
 
+function pkg_open {
+  URL=""
+  TYPE=""
+  DESC=""
+  DEPS=""
+  CFGARGS=""
+  . "${PKGDIR}/$1"
+  if [ -e "${USRDIR}/$1" ]; then
+    . "${USRDIR}/$1"
+  fi
+  # TODO: check package variables
+  if [ -z "${URL}" ]; then echo "No URL defined in package"; fi
+  if [ -z "${TYPE}" ]; then echo "No TYPE defined in package"; fi
+}
+
 [ -z "$1" ] && help
 while [ -f "${PKGDIR}/$1" ] ; do
   PKG=$1
-  . "${PKGDIR}/$1"
+  pkg_open "${PKG}"
   case $DO in
   -c) (pkg_clean) ; ;;
   -i) (pkg_fetch) ; (pkg_build) ; (pkg_install) ; ;;

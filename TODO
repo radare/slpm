@@ -1,2 +1,3 @@
-* A centralized way to maintain config files for all the packages
+* a centralized way to maintain config files for all the packages
 * eval $(slpm -) - to enter environment
+* add timestamp when installing
