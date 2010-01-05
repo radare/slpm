@@ -1,0 +1,6 @@
+URL=svn://svn.tartarus.org/sgt/halibut
+TYPE=svn
+DESC="halibut documentation system"
+DEPS="charset"
+PKGBUILD="make && cd doc && make"
+mkdir -p ${PREFIX}/man/man1

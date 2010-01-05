@@ -1,4 +1,3 @@
 URL=http://code.suckless.org/hg/surf
 TYPE=hg
 DESC="simple webkit based browser"
-DEPS=

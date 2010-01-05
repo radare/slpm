@@ -22,6 +22,7 @@ PKGDIR="${ROOT}/pkg"
 . "${ROOT}/config"
 NFODIR="${DESTDIR}/${PREFIX}/var/lib/slpm/pkg"
 
+# XXX a bit spaguetti
 function hg_fetch {
   mkdir -p $WRKDIR
   cd $WRKDIR
@@ -32,6 +33,19 @@ function hg_fetch {
     fi
   else
     hg clone "$2" "$1"
+  fi
+}
+
+function svn_fetch {
+  mkdir -p $WRKDIR
+  cd $WRKDIR
+  if [ -d "$1" ]; then
+    if [ "$3" = 1 ]; then
+      echo "==> svn: updating $1 ..."
+      ( cd "$1" ; svn up )
+    fi
+  else
+    svn co "$2" "$1"
   fi
 }
 
@@ -103,7 +117,7 @@ function pkg_install {
   fi
   (
     cd "$WRKDIR/$PKG/${BASEDIR}"
-    ${PKGINSTALL}
+    ${PKGINSTALL} ${PKGINSTALL_ARGS}
   )
   pkg_register
 }
@@ -111,13 +125,22 @@ function pkg_install {
 function pkg_register {
   [ -d "$NFODIR/$PKG" ] && return
   cd "$WRKDIR/$PKG"
+  # TODO: move outside and create skel in a standard way
   mkdir -p "${WRKDIR}/.tmp/${PKG}"
+  mkdir -p "${WRKDIR}/.tmp/${PKG}/bin"
+  mkdir -p "${WRKDIR}/.tmp/${PKG}/lib"
+  mkdir -p "${WRKDIR}/.tmp/${PKG}/man/man1"
   ${PKGINSTALL} "DESTDIR=${WRKDIR}/.tmp/${PKG}" "prefix=${WRKDIR}/.tmp/${PKG}"
   # go register
-  mkdir -p "$NFODIR/$PKG"
   cd "${WRKDIR}/.tmp/${PKG}"
   echo "${WRKDIR}/.tmp/${PKG}"
-  find * -type f > "$NFODIR/$PKG/files"
+  mkdir -p "$NFODIR/$PKG"
+  if [ -n "`ls`" ]; then
+    find * -type f > "$NFODIR/$PKG/files"
+  else
+    echo "==> WARNING: Package have installed no files"
+    : > "$NFODIR/$PKG/files"
+  fi
   date > "$NFODIR/$PKG/date"
   rm -rf "${WRKDIR}/.tmp/${PKG}"
 }
@@ -211,7 +234,8 @@ function pkg_open {
   DEPS=""
   CFGARGS=""
   BASEDIR=""
-  PKGINSTALL="make install DESTDIR=${DESTDIR} PREFIX=${PREFIX}"
+  PKGINSTALL="make install"
+  PKGINSTALL_ARGS="DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}"
   PKGCONFIGURE=""
   . "${PKGDIR}/$PKG"
   if [ -e "${USRDIR}/$PKG" ]; then
@@ -220,6 +244,12 @@ function pkg_open {
   # TODO: check package variables
   if [ -z "${URL}" ]; then echo "No URL defined in package"; fi
   if [ -z "${TYPE}" ]; then echo "No TYPE defined in package"; fi
+  for DEP in ${DEPS}; do
+    if [ ! -e "${NFODIR}/${DEP}" ]; then
+      echo "${PKG} depends on not yet installed ${DEP}"
+      exit 1
+    fi
+  done
 }
 
 [ -z "$1" ] && help

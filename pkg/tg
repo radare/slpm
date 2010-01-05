@@ -1,4 +1,3 @@
 TYPE=hg
 URL=http://news.nopcode.org/miau/hgi/tg
 DESC="Tiny gallery"
-DEPS=

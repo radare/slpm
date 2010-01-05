@@ -1,6 +1,5 @@
 URL=ftp://ftp.bostic.com/pub/nvi-1.79.tar.gz
 TYPE=tar
 DESC="berkeley visual editor"
-DEPS=
 BASEDIR=build
 LDFLAGS="${LDFLAGS} -lreadline"

@@ -1,4 +1,3 @@
 URL=http://bitbucket.org/noname/netscan/
 TYPE=hg
 DESC="network scan tool"
-DEPS=

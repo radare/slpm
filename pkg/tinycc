@@ -1,6 +1,5 @@
 URL=git://repo.or.cz/tinycc.git
 TYPE=git
 DESC="tiny c compiler"
-DEPS=
 # hack to not depend on texi2html
 touch ${WRKDIR}/${PKG}/tcc-doc.html

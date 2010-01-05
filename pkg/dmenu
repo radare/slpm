@@ -1,4 +1,3 @@
 URL=http://code.suckless.org/hg/dmenu
 TYPE=hg
 DESC="dynamic menu for X"
-DEPS=
