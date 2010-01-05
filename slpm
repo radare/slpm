@@ -6,7 +6,7 @@ function whereami {
   for a in $PWD `echo $PATH | sed 's,:, ,g'` ; do
     if [ -e "$a/$1" ]; then
       echo "$a/$1"
-      break
+      return
     fi
   done
   echo $1
