@@ -1,3 +1,4 @@
 TYPE=hg
-URL=http://news.nopcode.org/miau/hgi/tg
+URL=http://hg.youterm.com/tg
 DESC="Tiny gallery"
+DEPS=
