@@ -2,7 +2,7 @@
 # suckless package manager @ 2009-2010
 # - pancake at nopcode dot org
 
-function whereami {
+whereami() {
   for a in $PWD `echo $PATH | sed 's,:, ,g'` ; do
     if [ -e "$a/$1" ]; then
       echo "$a/$1"
@@ -23,7 +23,7 @@ PKGDIR="${ROOT}/pkg"
 NFODIR="${DESTDIR}/${PREFIX}/var/lib/slpm/pkg"
 
 # XXX a bit spaguetti
-function hg_fetch {
+hg_fetch() {
   mkdir -p $WRKDIR
   cd $WRKDIR
   if [ -d "$1" ]; then
