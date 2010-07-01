@@ -2,7 +2,7 @@
 # suckless package manager @ 2009-2010
 # - pancake at nopcode dot org
 
-function whereami {
+whereami() {
   for a in $PWD `echo $PATH | sed 's,:, ,g'` ; do
     if [ -e "$a/$1" ]; then
       echo "$a/$1"
@@ -23,7 +23,7 @@ PKGDIR="${ROOT}/pkg"
 NFODIR="${DESTDIR}/${PREFIX}/var/lib/slpm/pkg"
 
 # XXX a bit spaguetti
-function hg_fetch {
+hg_fetch() {
   mkdir -p $WRKDIR
   cd $WRKDIR
   if [ -d "$1" ]; then
@@ -36,7 +36,7 @@ function hg_fetch {
   fi
 }
 
-function svn_fetch {
+svn_fetch() {
   mkdir -p $WRKDIR
   cd $WRKDIR
   if [ -d "$1" ]; then
@@ -49,7 +49,7 @@ function svn_fetch {
   fi
 }
 
-function git_fetch {
+git_fetch() {
   mkdir -p "$WRKDIR"
   cd "$WRKDIR"
   if [ -d "$1" ]; then
@@ -61,7 +61,7 @@ function git_fetch {
   fi
 }
 
-function tar_fetch {
+tar_fetch() {
   FILE="`basename $URL`"
   cd "$WRKDIR"
   if [ -f "$WRKDIR/$FILE" ]; then
@@ -79,22 +79,22 @@ function tar_fetch {
   fi
 }
 
-function pkg_fetch {
+pkg_fetch() {
   eval ${TYPE}_fetch $PKG $URL $1
 }
 
-function pkg_update {
+pkg_update() {
   hg_fetch $PKG $URL
 }
 
-function pkg_check {
+pkg_check() {
   if [ ! -f "$PKGDIR/$PKG" ]; then
     echo "Cannot find $PKG"
     exit 1
   fi
 }
 
-function pkg_build {
+pkg_build() {
   if [ ! -d "$WRKDIR/$PKG" ]; then
     echo "pkg_build: Cannot open target directory"
     exit 1
@@ -103,14 +103,14 @@ function pkg_build {
   if [ -n "${PKGCONFIGURE}" ]; then
     ${PKGCONFIGURE}
   else
-  if [ -x "configure" ]; then
-    ./configure "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
-  fi
+    if [ -x "configure" ]; then
+      ./configure "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
+    fi
   fi
   make DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}
 }
 
-function pkg_install {
+pkg_install() {
   if [ ! -d "$WRKDIR/$PKG/${BASEDIR}" ]; then
     echo "pkg_install: Cannot open target directory"
     exit 1
@@ -122,7 +122,7 @@ function pkg_install {
   pkg_register
 }
 
-function pkg_register {
+pkg_register() {
   [ -d "$NFODIR/$PKG" ] && return
   cd "$WRKDIR/$PKG"
   # TODO: move outside and create skel in a standard way
@@ -145,12 +145,12 @@ function pkg_register {
   rm -rf "${WRKDIR}/.tmp/${PKG}"
 }
 
-function pkg_clean {
+pkg_clean() {
   cd "$WRKDIR/$PKG"
   make clean
 }
 
-function pkg_deinstall {
+pkg_deinstall() {
   if [ -e "$NFODIR/$PKG/files" ]; then
     cd "${DESTDIR}/${PREFIX}"
     for a in `cat $NFODIR/$PKG/files`; do
@@ -164,7 +164,7 @@ function pkg_deinstall {
   fi
 }
 
-function help {
+help() {
   echo "Usage: slpm [-iudlLx] [pkg pkg ..]"
   echo " -x : execute or enter into the slpm shell"
   echo " -u : upgrade package"
@@ -177,7 +177,7 @@ function help {
   exit 1
 }
 
-function exec_shell {
+exec_shell() {
   SHELL=""
   [ -x "${PREFIX}/bin/rc" ] && SHELL="${PREFIX}/bin/rc"
   [ -x "${PREFIX}/bin/ksh" ] && SHELL="${PREFIX}/bin/ksh"
@@ -227,7 +227,7 @@ while [ -n "$1" ]; do
   shift
 done
 
-function pkg_open {
+pkg_open() {
   URL=""
   TYPE=""
   DESC=""
