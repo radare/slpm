@@ -19,13 +19,13 @@ ROOT="`dirname $ARG0`"
 USRDIR="${HOME}/.slpm"
 WRKDIR="${ROOT}/_work"
 PKGDIR="${ROOT}/pkg"
+BINPKGDIR="${ROOT}/binpkg"
 MAKE=make
 . "${ROOT}/config"
 NFODIR="${DESTDIR}/${PREFIX}/var/lib/slpm/pkg"
 
 # XXX a bit spaguetti
 hg_fetch() {
-  mkdir -p $WRKDIR
   cd $WRKDIR
   if [ -d "$1" ]; then
     if [ "$3" = 1 ]; then
@@ -38,7 +38,6 @@ hg_fetch() {
 }
 
 svn_fetch() {
-  mkdir -p $WRKDIR
   cd $WRKDIR
   if [ -d "$1" ]; then
     if [ "$3" = 1 ]; then
@@ -51,7 +50,6 @@ svn_fetch() {
 }
 
 git_fetch() {
-  mkdir -p "$WRKDIR"
   cd "$WRKDIR"
   if [ -d "$1" ]; then
     if [ "$3" = 1 ]; then
@@ -95,12 +93,21 @@ pkg_build() {
     exit 1
   fi
   cd "$WRKDIR/$PKG/${BASEDIR}"
-  if [ -n "${PKGCONFIGURE}" ]; then
-    ${PKGCONFIGURE}
+  if [ -e .configure_executed ]; then
+    echo "Not running ./configure because of .configure_executed"
   else
-    if [ -x "configure" ]; then
-      ./configure "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
+    if [ -n "${PKGCONFIGURE}" ]; then
+      ${PKGCONFIGURE}
+    else
+      if [ -x "configure" ]; then
+        ./configure "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
+        if [ ! $? = 0 ]; then
+          echo "=> Configure stage failed :("
+          exit 1
+        fi
+      fi
     fi
+    :> .configure_executed
   fi
   ${MAKE} DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}
 }
@@ -112,6 +119,10 @@ pkg_install() {
   fi
   (
     cd "$WRKDIR/$PKG/${BASEDIR}"
+    if [ -n "${INSTALL_PRE}" ]; then
+      echo "=> Running pre install script '${INSTALL_PRE}'"
+      (cd ${DESTDIR}/${PREFIX} ; eval $INSTALL_PRE)
+    fi
     ${PKGINSTALL} ${PKGINSTALL_ARGS}
     if [ -n "${INSTALL_POST}" ]; then
       echo "=> Running post install script '${INSTALL_POST}'"
@@ -119,6 +130,21 @@ pkg_install() {
     fi
   )
   pkg_register
+}
+
+binpkg_register() {
+  PKGNAME=`basename $PKG | sed -e s,slpm-,, -e s,.tgz,,`
+  echo "=> Register binary package $PKGNAME"
+  mkdir -p $NFODIR/$PKGNAME
+  tar tzf $PKG | grep -v /$ | grep -v slpm.nfo > $NFODIR/$PKGNAME/files
+  date > "$NFODIR/$PKGNAME/date"
+}
+
+binpkg_install() {
+  echo "=> Installing binary package"
+  tar xzvf $PKG -C ${DESTDIR}/${PREFIX} | grep -v slpm.nfo | grep -v /$
+  rm -f slpm.nfo
+  binpkg_register
 }
 
 pkg_register() {
@@ -129,14 +155,28 @@ pkg_register() {
   mkdir -p "${WRKDIR}/.tmp/${PKG}/bin"
   mkdir -p "${WRKDIR}/.tmp/${PKG}/lib"
   mkdir -p "${WRKDIR}/.tmp/${PKG}/man/man1"
-  ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" "prefix=${WRKDIR}/.tmp/${PKG}"
+## XXX: dupped from pkg_install
+    if [ -n "${INSTALL_PRE}" ]; then
+      echo "=> Running pre install script '${INSTALL_PRE}'"
+      (cd ${WRKDIR}/.tmp/${PKG} ; eval $INSTALL_PRE)
+    fi
+  ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" prefix=/
+#"prefix=${WRKDIR}/.tmp/${PKG}"
+## XXX: dupped from pkg_install
+    if [ -n "${INSTALL_POST}" ]; then
+      echo "=> Running post install script '${INSTALL_POST}'"
+      (cd ${WRKDIR}/.tmp/${PKG} ; eval $INSTALL_POST)
+    fi
   # go register
   cd "${WRKDIR}/.tmp/${PKG}"
   echo "${WRKDIR}/.tmp/${PKG}"
   mkdir -p "$NFODIR/$PKG"
   if [ -n "`ls`" ]; then
-    _pfx=`pwd|cut -c 2-`
+    _pfx=`pwd | cut -c 2-`
     find * -type f | sed -e "s,$_pfx,," > "$NFODIR/$PKG/files"
+    echo "=> Create binary package: ${BINPKGDIR}/slpm-${PKG}.tgz"
+    cp ${PKGDIR}/${PKG} slpm.nfo
+    tar czf ${BINPKGDIR}/slpm-${PKG}.tgz *
   else
     echo "==> WARNING: Package have installed no files"
     : > "$NFODIR/$PKG/files"
@@ -169,6 +209,7 @@ help() {
   echo " -x : execute or enter into the slpm shell"
   echo " -u : upgrade package"
   echo " -i : install package"
+  echo " -I : install binary package (slpm-*.tgz)"
   echo " -d : deinstall package"
   echo " -c : clean package"
   echo " -s : search package by keyword"
@@ -181,9 +222,10 @@ exec_shell() {
   SHELL=""
   [ -x "${PREFIX}/bin/rc" ] && SHELL="${PREFIX}/bin/rc"
   [ -x "${PREFIX}/bin/ksh" ] && SHELL="${PREFIX}/bin/ksh"
+  [ -x "${PREFIX}/bin/dash" ] && SHELL="${PREFIX}/bin/dash"
   [ -x "${PREFIX}/bin/sh" ] && SHELL="${PREFIX}/bin/sh"
   if [ -z "${SHELL}" ]; then
-    echo "Cannot find shell. Please install busybox or 9base"
+    echo "Cannot find shell. Please install dash, busybox or 9base"
     exit 1
   fi
   PATH=${PREFIX}/bin:${PREFIX}/sbin:${PATH}
@@ -197,15 +239,14 @@ exec_shell() {
   exit $?
 }
 
-[ ! -d "${NFODIR}" ] && mkdir -p "${NFODIR}"
-[ ! -d "${WRKDIR}" ] && mkdir -p "${WRKDIR}"
+mkdir -p "${NFODIR}" "${WRKDIR}" "${BINPKGDIR}"
 
 DO=
 while [ -n "$1" ]; do
   case "$1" in
   -x) exec_shell ; ;;
   -h) help ; ;;
-  -c|-i|-u|-d) DO=$1 ; ;;
+  -c|-i|-I|-u|-d) DO=$1 ; ;;
   -s)
     if [ -z "$2" ]; then
       echo "Usage: slpm -s [keyword]"
@@ -219,7 +260,11 @@ while [ -n "$1" ]; do
     if [ -z "$2" ]; then
       ls "$NFODIR" | cat ; exit 0
     else
-      cat "$NFODIR/$2/files" ; exit 0
+      if [ ! -d "$NFODIR/$2" ]; then
+        echo "Package $2 not installed" ; exit 1
+      else
+        cat "$NFODIR/$2/files" ; exit 0
+      fi
     fi
     ;;
   -*) echo "Unknown flag '$1'" ;;
@@ -239,6 +284,16 @@ pkg_open() {
   PKGINSTALL="${MAKE} install"
   PKGINSTALL_ARGS="DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}"
   PKGCONFIGURE=""
+  if [ "`echo $PKG|grep .tgz$`" ]; then
+    tar xvzf ${PKG} slpm.nfo
+    if [ ! $? = 0 ]; then
+      echo "This is not a binary slpm package"
+      exit 1
+    fi
+    . ./slpm.nfo
+    rm -f slpm.nfo
+    return
+  fi
   if [ ! -f "$PKGDIR/$PKG" ]; then
     echo "Cannot find $PKG"
     exit 1
@@ -269,6 +324,7 @@ while [ -n "$1" ]; do
   case $DO in
   -c) (pkg_clean) ; ;;
   -i) (pkg_fetch) ; (pkg_build) ; (pkg_install) ; ;;
+  -I) (binpkg_install) ; ;;
   -u) (pkg_fetch 1) ; (pkg_build) ; (pkg_install) ; ;;
   -d) (pkg_deinstall) ; ;;
   *) (pkg_fetch) ; ;;

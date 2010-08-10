@@ -1,6 +1,6 @@
 * Support pkgname without version
+* checksum all bins
 * Support to pass pkgname with fullpath
 * 9base has some warnings. push patch
   - there is no way to patch sources
-* do not configure twice
 * support ed and sed-like patches
