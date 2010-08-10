@@ -1,0 +1,4 @@
+URL=http://hg.suckless.org/swk
+TYPE=hg
+DESC="simple widget kit"
+DEPS=

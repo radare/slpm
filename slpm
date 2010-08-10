@@ -325,8 +325,11 @@ pkg_open() {
     return
   fi
   if [ ! -f "$PKGDIR/$PKG" ]; then
-    echo "Cannot find $PKG"
-    exit 1
+    PKG=`basename $PKGDIR/$PKG*` # autocomplete
+    if [ ! -f "$PKGDIR/$PKG" ]; then
+      echo "Cannot find $PKG"
+      exit 1
+    fi
   fi
   . "${PKGDIR}/$PKG"
   if [ -e "${USRDIR}/$PKG" ]; then

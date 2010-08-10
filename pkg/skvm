@@ -1,0 +1,4 @@
+URL=http://hg.suckless.org/skvm
+TYPE=hg
+DESC="skvm"
+DEPS=

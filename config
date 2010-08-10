@@ -1,7 +1,7 @@
 # Configuration shellscript for slpm
 
-DESTDIR=""
-PREFIX="${ROOT}/_prefix"
+DESTDIR="${ROOT}/_prefix"
+PREFIX="/"
 #PREFIX="/usr"
 
 CHKSUM=md5sum
