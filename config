@@ -4,6 +4,8 @@ DESTDIR=""
 PREFIX="${ROOT}/_prefix"
 #PREFIX="/usr"
 
+CHKSUM=md5sum
+
 # Directory to store binary packages
 #BINPKGDIR=/tmp
 

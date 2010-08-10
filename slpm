@@ -20,6 +20,7 @@ USRDIR="${HOME}/.slpm"
 WRKDIR="${ROOT}/_work"
 PKGDIR="${ROOT}/pkg"
 BINPKGDIR="${ROOT}/binpkg"
+CHKSUM=md5sum
 MAKE=make
 . "${ROOT}/config"
 NFODIR="${DESTDIR}/${PREFIX}/var/lib/slpm/pkg"
@@ -132,11 +133,38 @@ pkg_install() {
   pkg_register
 }
 
+pkg_chksum() {
+  if [ ! -e $NFODIR/$PKG/chksum ]; then
+    echo "Cannot find chksum database for $PKG"
+    return
+  fi
+  for a in `cat $NFODIR/$PKG/files` ; do
+    orig=`grep $a$ $NFODIR/$PKG/chksum | awk '{print $1}'`
+    cur=`$CHKSUM ${DESTDIR}/${PREFIX}/$a | awk '{print $1}'`
+    if [ "$orig" = "$cur" ]; then
+      echo ". $orig $cur $a"
+    else
+      echo "x $orig $cur $a"
+    fi
+  done
+}
+
+pkg_register_chksum() {
+  PKGNAME=$1
+  (
+  cd ${DESTDIR}/${PREFIX}
+  for a in `cat $NFODIR/$PKGNAME/files` ; do
+      ${CHKSUM} $a 
+  done
+  ) > $NFODIR/$PKGNAME/chksum
+}
+
 binpkg_register() {
   PKGNAME=`basename $PKG | sed -e s,slpm-,, -e s,.tgz,,`
   echo "=> Register binary package $PKGNAME"
   mkdir -p $NFODIR/$PKGNAME
   tar tzf $PKG | grep -v /$ | grep -v slpm.nfo > $NFODIR/$PKGNAME/files
+  pkg_register_chksum ${PKGNAME}
   date > "$NFODIR/$PKGNAME/date"
 }
 
@@ -177,6 +205,7 @@ pkg_register() {
     echo "=> Create binary package: ${BINPKGDIR}/slpm-${PKG}.tgz"
     cp ${PKGDIR}/${PKG} slpm.nfo
     tar czf ${BINPKGDIR}/slpm-${PKG}.tgz *
+    pkg_register_chksum ${PKG}
   else
     echo "==> WARNING: Package have installed no files"
     : > "$NFODIR/$PKG/files"
@@ -212,6 +241,7 @@ help() {
   echo " -I : install binary package (slpm-*.tgz)"
   echo " -d : deinstall package"
   echo " -c : clean package"
+  echo " -C : check checksum of pkg files (u,m=un,modified)"
   echo " -s : search package by keyword"
   echo " -l : list installed packages or pkg files"
   echo " -L : list all available packages"
@@ -246,7 +276,7 @@ while [ -n "$1" ]; do
   case "$1" in
   -x) exec_shell ; ;;
   -h) help ; ;;
-  -c|-i|-I|-u|-d) DO=$1 ; ;;
+  -c|-C|-i|-I|-u|-d) DO=$1 ; ;;
   -s)
     if [ -z "$2" ]; then
       echo "Usage: slpm -s [keyword]"
@@ -315,6 +345,7 @@ pkg_open() {
       fi
     fi
   done
+  echo "=> Open ${PKG}"
 }
 
 [ -z "$1" ] && help
@@ -322,6 +353,7 @@ while [ -n "$1" ]; do
   PKG=$1
   pkg_open
   case $DO in
+  -C) (pkg_chksum) ; ;;
   -c) (pkg_clean) ; ;;
   -i) (pkg_fetch) ; (pkg_build) ; (pkg_install) ; ;;
   -I) (binpkg_install) ; ;;
