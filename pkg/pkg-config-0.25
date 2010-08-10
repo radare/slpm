@@ -1,0 +1,3 @@
+URL=http://pkgconfig.freedesktop.org/releases/pkg-config-0.25.tar.gz
+DESC="pkg config tool"
+TYPE=tar

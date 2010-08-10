@@ -87,13 +87,6 @@ pkg_update() {
   hg_fetch $PKG $URL
 }
 
-pkg_check() {
-  if [ ! -f "$PKGDIR/$PKG" ]; then
-    echo "Cannot find $PKG"
-    exit 1
-  fi
-}
-
 pkg_build() {
   if [ ! -d "$WRKDIR/$PKG" ]; then
     echo "pkg_build: Cannot open target directory"
@@ -118,6 +111,10 @@ pkg_install() {
   (
     cd "$WRKDIR/$PKG/${BASEDIR}"
     ${PKGINSTALL} ${PKGINSTALL_ARGS}
+    if [ -n "${INSTALL_POST}" ]; then
+      echo "=> Running post install script '${INSTALL_POST}'"
+      (cd ${DESTDIR}/${PREFIX} ; eval $INSTALL_POST)
+    fi
   )
   pkg_register
 }
@@ -136,7 +133,8 @@ pkg_register() {
   echo "${WRKDIR}/.tmp/${PKG}"
   mkdir -p "$NFODIR/$PKG"
   if [ -n "`ls`" ]; then
-    find * -type f > "$NFODIR/$PKG/files"
+    _pfx=`pwd|cut -c 2-`
+    find * -type f | sed -e "s,$_pfx,," > "$NFODIR/$PKG/files"
   else
     echo "==> WARNING: Package have installed no files"
     : > "$NFODIR/$PKG/files"
@@ -154,7 +152,7 @@ pkg_deinstall() {
   if [ -e "$NFODIR/$PKG/files" ]; then
     cd "${DESTDIR}/${PREFIX}"
     for a in `cat $NFODIR/$PKG/files`; do
-      [ -f "$a" ] && echo "$a" && rm -f "$a"
+      [ -f "./$a" ] && echo "./$a" && rm -f "./$a"
     done
     rm -rf "$NFODIR/$PKG"
   else
@@ -198,6 +196,7 @@ exec_shell() {
 }
 
 [ ! -d "${NFODIR}" ] && mkdir -p "${NFODIR}"
+[ ! -d "${WRKDIR}" ] && mkdir -p "${WRKDIR}"
 
 DO=
 while [ -n "$1" ]; do
@@ -234,9 +233,14 @@ pkg_open() {
   DEPS=""
   CFGARGS=""
   BASEDIR=""
+  INSTALL_POST="" # script to run after install
   PKGINSTALL="make install"
   PKGINSTALL_ARGS="DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}"
   PKGCONFIGURE=""
+  if [ ! -f "$PKGDIR/$PKG" ]; then
+    echo "Cannot find $PKG"
+    exit 1
+  fi
   . "${PKGDIR}/$PKG"
   if [ -e "${USRDIR}/$PKG" ]; then
     . "${USRDIR}/$PKG"
@@ -255,7 +259,7 @@ pkg_open() {
 [ -z "$1" ] && help
 while [ -n "$1" ]; do
   PKG=$1
-  pkg_check && pkg_open
+  pkg_open
   case $DO in
   -c) (pkg_clean) ; ;;
   -i) (pkg_fetch) ; (pkg_build) ; (pkg_install) ; ;;
