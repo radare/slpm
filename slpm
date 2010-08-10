@@ -138,6 +138,7 @@ pkg_chksum() {
     echo "Cannot find chksum database for $PKG"
     return
   fi
+  echo "# package ${PKG}"
   for a in `cat $NFODIR/$PKG/files` ; do
     orig=`grep $a$ $NFODIR/$PKG/chksum | awk '{print $1}'`
     cur=`$CHKSUM ${DESTDIR}/${PREFIX}/$a | awk '{print $1}'`
@@ -291,9 +292,14 @@ while [ -n "$1" ]; do
       ls "$NFODIR" | cat ; exit 0
     else
       if [ ! -d "$NFODIR/$2" ]; then
-        echo "Package $2 not installed" ; exit 1
+        PKG=`basename $NFODIR/$2* 2> /dev/null` # autocomplete
+        if [ ! -d "$NFODIR/$PKG" ]; then
+          echo "Package $2 not installed" ; exit 1
+        else
+          cat "$NFODIR/$PKG/files" ; exit 0
+        fi
       else
-        cat "$NFODIR/$2/files" ; exit 0
+        cat "$NFODIR/$PKG/files" ; exit 0
       fi
     fi
     ;;
@@ -325,11 +331,12 @@ pkg_open() {
     return
   fi
   if [ ! -f "$PKGDIR/$PKG" ]; then
-    PKG=`basename $PKGDIR/$PKG*` # autocomplete
-    if [ ! -f "$PKGDIR/$PKG" ]; then
+    PKG2=`basename $PKGDIR/$PKG* 2> /dev/null` # autocomplete
+    if [ ! -f "$PKGDIR/$PKG2" ]; then
       echo "Cannot find $PKG"
       exit 1
     fi
+    PKG=$PKG2
   fi
   . "${PKGDIR}/$PKG"
   if [ -e "${USRDIR}/$PKG" ]; then
@@ -348,7 +355,6 @@ pkg_open() {
       fi
     fi
   done
-  echo "=> Open ${PKG}"
 }
 
 [ -z "$1" ] && help
