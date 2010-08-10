@@ -36,7 +36,7 @@ hg_fetch() {
   fi
 }
 
-function svn_fetch {
+svn_fetch() {
   mkdir -p $WRKDIR
   cd $WRKDIR
   if [ -d "$1" ]; then
@@ -49,7 +49,7 @@ function svn_fetch {
   fi
 }
 
-function git_fetch {
+git_fetch() {
   mkdir -p "$WRKDIR"
   cd "$WRKDIR"
   if [ -d "$1" ]; then
@@ -61,7 +61,7 @@ function git_fetch {
   fi
 }
 
-function tar_fetch {
+tar_fetch() {
   FILE="`basename $URL`"
   cd "$WRKDIR"
   if [ -f "$WRKDIR/$FILE" ]; then
@@ -79,22 +79,15 @@ function tar_fetch {
   fi
 }
 
-function pkg_fetch {
+pkg_fetch() {
   eval ${TYPE}_fetch $PKG $URL $1
 }
 
-function pkg_update {
+pkg_update() {
   hg_fetch $PKG $URL
 }
 
-function pkg_check {
-  if [ ! -f "$PKGDIR/$PKG" ]; then
-    echo "Cannot find $PKG"
-    exit 1
-  fi
-}
-
-function pkg_build {
+pkg_build() {
   if [ ! -d "$WRKDIR/$PKG" ]; then
     echo "pkg_build: Cannot open target directory"
     exit 1
@@ -103,14 +96,14 @@ function pkg_build {
   if [ -n "${PKGCONFIGURE}" ]; then
     ${PKGCONFIGURE}
   else
-  if [ -x "configure" ]; then
-    ./configure "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
-  fi
+    if [ -x "configure" ]; then
+      ./configure "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
+    fi
   fi
   make DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}
 }
 
-function pkg_install {
+pkg_install() {
   if [ ! -d "$WRKDIR/$PKG/${BASEDIR}" ]; then
     echo "pkg_install: Cannot open target directory"
     exit 1
@@ -118,11 +111,15 @@ function pkg_install {
   (
     cd "$WRKDIR/$PKG/${BASEDIR}"
     ${PKGINSTALL} ${PKGINSTALL_ARGS}
+    if [ -n "${INSTALL_POST}" ]; then
+      echo "=> Running post install script '${INSTALL_POST}'"
+      (cd ${DESTDIR}/${PREFIX} ; eval $INSTALL_POST)
+    fi
   )
   pkg_register
 }
 
-function pkg_register {
+pkg_register() {
   [ -d "$NFODIR/$PKG" ] && return
   cd "$WRKDIR/$PKG"
   # TODO: move outside and create skel in a standard way
@@ -136,7 +133,8 @@ function pkg_register {
   echo "${WRKDIR}/.tmp/${PKG}"
   mkdir -p "$NFODIR/$PKG"
   if [ -n "`ls`" ]; then
-    find * -type f > "$NFODIR/$PKG/files"
+    _pfx=`pwd|cut -c 2-`
+    find * -type f | sed -e "s,$_pfx,," > "$NFODIR/$PKG/files"
   else
     echo "==> WARNING: Package have installed no files"
     : > "$NFODIR/$PKG/files"
@@ -145,16 +143,16 @@ function pkg_register {
   rm -rf "${WRKDIR}/.tmp/${PKG}"
 }
 
-function pkg_clean {
+pkg_clean() {
   cd "$WRKDIR/$PKG"
   make clean
 }
 
-function pkg_deinstall {
+pkg_deinstall() {
   if [ -e "$NFODIR/$PKG/files" ]; then
     cd "${DESTDIR}/${PREFIX}"
     for a in `cat $NFODIR/$PKG/files`; do
-      [ -f "$a" ] && echo "$a" && rm -f "$a"
+      [ -f "./$a" ] && echo "./$a" && rm -f "./$a"
     done
     rm -rf "$NFODIR/$PKG"
   else
@@ -164,7 +162,7 @@ function pkg_deinstall {
   fi
 }
 
-function help {
+help() {
   echo "Usage: slpm [-iudlLx] [pkg pkg ..]"
   echo " -x : execute or enter into the slpm shell"
   echo " -u : upgrade package"
@@ -177,7 +175,7 @@ function help {
   exit 1
 }
 
-function exec_shell {
+exec_shell() {
   SHELL=""
   [ -x "${PREFIX}/bin/rc" ] && SHELL="${PREFIX}/bin/rc"
   [ -x "${PREFIX}/bin/ksh" ] && SHELL="${PREFIX}/bin/ksh"
@@ -198,6 +196,7 @@ function exec_shell {
 }
 
 [ ! -d "${NFODIR}" ] && mkdir -p "${NFODIR}"
+[ ! -d "${WRKDIR}" ] && mkdir -p "${WRKDIR}"
 
 DO=
 while [ -n "$1" ]; do
@@ -227,16 +226,21 @@ while [ -n "$1" ]; do
   shift
 done
 
-function pkg_open {
+pkg_open() {
   URL=""
   TYPE=""
   DESC=""
   DEPS=""
   CFGARGS=""
   BASEDIR=""
+  INSTALL_POST="" # script to run after install
   PKGINSTALL="make install"
   PKGINSTALL_ARGS="DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}"
   PKGCONFIGURE=""
+  if [ ! -f "$PKGDIR/$PKG" ]; then
+    echo "Cannot find $PKG"
+    exit 1
+  fi
   . "${PKGDIR}/$PKG"
   if [ -e "${USRDIR}/$PKG" ]; then
     . "${USRDIR}/$PKG"
@@ -255,7 +259,7 @@ function pkg_open {
 [ -z "$1" ] && help
 while [ -n "$1" ]; do
   PKG=$1
-  pkg_check && pkg_open
+  pkg_open
   case $DO in
   -c) (pkg_clean) ; ;;
   -i) (pkg_fetch) ; (pkg_build) ; (pkg_install) ; ;;

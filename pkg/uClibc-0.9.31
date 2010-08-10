@@ -1,0 +1,4 @@
+URL=http://www.uclibc.org/downloads/uClibc-0.9.31.tar.bz2
+TYPE=tar
+DESC="micro C library"
+#INSTALL_POST="mkdir -p usr lib; mv usr/*uclibc/lib/* lib;mv usr/*uclibc/usr/* usr"
