@@ -1,0 +1,4 @@
+URL=http://hg.youterm.com/slpm
+DESC="Suckless package manager"
+TYPE=hg
+DEPS=
