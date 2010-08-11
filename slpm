@@ -314,8 +314,9 @@ while [ -n "$1" ]; do
   case "$1" in
   -f) fixlibs ; exit 0 ; ;;
   -fi)
+    mkdir -p ${DESTDIR}/${PREFIX}/lib
     for a in `fixlibs` ; do
-      cp $a ${PREFIX}/lib
+      cp $a ${DESTDIR}/${PREFIX}/lib
       echo $(basename $a) >> ${NFODIR}/.fixedlibs
     done
     exit 0
@@ -324,7 +325,7 @@ while [ -n "$1" ]; do
   -fd)
     for a in $(cat ${NFODIR}/.fixedlibs) ; do
       echo $a
-      rm -f ${PREFIX}/lib/$a
+      rm -f ${DESTDIR}/${PREFIX}/lib/$a
     done
     :> ${NFODIR}/.fixedlibs
     exit 0
