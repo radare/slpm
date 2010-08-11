@@ -1,5 +1,6 @@
 URL=git://github.com/rakudo/rakudo.git
 TYPE=git
+DESC="perl6 on top of parrot"
 PKGCONFIGURE="perl Configure.pl --gen-parrot"
 PKGINSTALL=""
 INSTALL_POST="mkdir -p ${DESTDIR}/${PREFIX}/bin ; cp ${WRKDIR}/${PKG}/${BASEDIR}/perl6 bin"
