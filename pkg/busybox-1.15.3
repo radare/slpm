@@ -1,4 +1,5 @@
 URL=http://www.busybox.net/downloads/busybox-1.15.3.tar.bz2
 TYPE=tar
 DESC="utilities for rescue and embedded systems"
-PKGCONFIGURE="make defconfig PREFIX=${PREFIX}"
+PKGCONFIGURE="make defconfig PREFIX=${DESTDIR}${PREFIX}"
+INSTALL_POST="cp -rfa ${WRKDIR}/${PKG}/${BASEDIR}/_install/* ."

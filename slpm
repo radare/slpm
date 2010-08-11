@@ -138,7 +138,7 @@ pkg_install() {
       echo "=> Running pre install script '${INSTALL_PRE}'"
       (cd ${DESTDIR}/${PREFIX} ; eval $INSTALL_PRE)
     fi
-    ${PKGINSTALL} ${PKGINSTALL_ARGS}
+    eval ${PKGINSTALL} ${PKGINSTALL_ARGS}
     if [ -n "${INSTALL_POST}" ]; then
       echo "=> Running post install script '${INSTALL_POST}'"
       (cd ${DESTDIR}/${PREFIX} ; eval $INSTALL_POST)
@@ -203,7 +203,7 @@ pkg_register() {
       echo "=> Running pre install script '${INSTALL_PRE}'"
       (cd ${WRKDIR}/.tmp/${PKG} ; eval $INSTALL_PRE)
     fi
-  ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" prefix=/
+  eval ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" prefix=/
 #"prefix=${WRKDIR}/.tmp/${PKG}"
 ## XXX: dupped from pkg_install
     if [ -n "${INSTALL_POST}" ]; then
@@ -260,7 +260,7 @@ help() {
   echo " -C : check checksum of pkg files (u,m=un,modified)"
   echo " -s : search package by keyword"
   echo " -l : list installed packages or pkg files"
-  echo " -L : list all available packages"
+  echo " -L : list all available packages (-LL for description)"
   exit 1
 }
 
@@ -302,6 +302,11 @@ while [ -n "$1" ]; do
     exit 0
     ;;
   -L) ls ${PKGDIR} | cat ; exit 0 ; ;;
+  -LL)
+     for a in `ls ${PKGDIR}`; do
+       . ${PKGDIR}/$a
+       printf "%20s  $DESC\n" $a
+     done ; exit 0 ; ;;
   -l)
     if [ -z "$2" ]; then
       ls "$NFODIR" | cat ; exit 0
@@ -379,7 +384,7 @@ pkg_open() {
     echo "  ${MSG}"
     echo "=="
     echo ""
-    sleep 2
+    sleep 1
   fi
 }
 
