@@ -1,0 +1,6 @@
+URL=git://github.com/rakudo/rakudo.git
+TYPE=git
+PKGCONFIGURE="perl Configure.pl --gen-parrot"
+PKGINSTALL=""
+INSTALL_POST="mkdir -p ${DESTDIR}/${PREFIX}/bin ; cp ${WRKDIR}/${PKG}/${BASEDIR}/perl6 bin"
+MSG="This package only works in _work (not installed)"

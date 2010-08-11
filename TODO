@@ -9,8 +9,6 @@
   $ slpm -i pkg # if ${REMOTE} != there uses ${WGET} to download the file if not exist in local path (rsync?)
 * Add specific configure flags per pkg or globally
 * Add a list of ignored packages on dependencies to use system ones (SYSDEPS=...)
-* Add command to find and register missing libraries, take them from system
-  - like in mirror.pl
 * add support for revision
 * Add specific src base directory swig/ for radare2-swig f.ex
 * CONFLICT= in pkgs

@@ -12,6 +12,22 @@ whereami() {
   echo $1
 }
 
+fixlibs() {
+ libs=$((
+  cd ${PREFIX}
+  export LD_LIBRARY_PATH=${PREFIX}/lib
+  for bin in `ls bin` ; do
+    ldd bin/$bin | cut -d '>' -f 2- |cut -c 2-| grep ^/ | cut -d ' ' -f 1 | grep -v ${PREFIX}
+  done
+ ) | sort | uniq)
+ for a in $libs ; do
+   ba=$(basename $a)
+   if [ ! -e "${PREFIX}/lib/$ba" ]; then
+     echo $a
+   fi
+ done
+}
+
 BIN="`readlink $0`"
 [ -z "${BIN}" ] && BIN=$0
 [ -z "${BIN}" ] && BIN=/bin/sh # XXX?
@@ -104,7 +120,7 @@ pkg_build() {
     if [ -n "${PKGCONFIGURE}" ]; then
       ${PKGCONFIGURE}
     else
-      chmod +x configure
+      [ -f configure ] && chmod +x configure
       if [ -x "configure" ]; then
         ./configure "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
         if [ ! $? = 0 ]; then
@@ -180,13 +196,13 @@ binpkg_register() {
   mkdir -p $NFODIR/$PKGNAME
   tar tzf $PKG | grep -v /$ | grep -v slpm.nfo > $NFODIR/$PKGNAME/files
   pkg_register_chksum ${PKGNAME}
+  mv ${DESTDIR}/${PREFIX}/slpm.nfo $NFODIR/$PKGNAME/slpm.nfo
   date > "$NFODIR/$PKGNAME/date"
 }
 
 binpkg_install() {
   echo "=> Installing binary package"
   tar xzvf $PKG -C ${DESTDIR}/${PREFIX} | grep -v slpm.nfo | grep -v /$
-  rm -f slpm.nfo
   binpkg_register
 }
 
@@ -227,6 +243,7 @@ pkg_register() {
     : > "$NFODIR/$PKG/files"
   fi
   date > "$NFODIR/$PKG/date"
+  cp ${PKGDIR}/${PKG} $NFODIR/$PKG/slpm.nfo
   rm -rf "${WRKDIR}/.tmp/${PKG}"
 }
 
@@ -261,6 +278,7 @@ help() {
   echo " -s : search package by keyword"
   echo " -l : list installed packages or pkg files"
   echo " -L : list all available packages (-LL for description)"
+  echo " -f : find missing libraries (-fi: install, -fl: list, -fd: remove)"
   exit 1
 }
 
@@ -280,17 +298,38 @@ exec_shell() {
   PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
   unset PROMPT_COMMAND
   export PATH MANPATH LD_LIBRARY_PATH PKG_CONFIG_PATH
-  shift
-  ${SHELL} $@
+  if [ -z "$@" ]; then
+    eval ${SHELL}
+  else
+    eval $@
+  fi
   exit $?
 }
 
+[ ! -e "${NFODIR}/.fixedlibs" ] && :> ${NFODIR}/.fixedlibs
 mkdir -p "${NFODIR}" "${WRKDIR}" "${BINPKGDIR}"
 
 DO=
 while [ -n "$1" ]; do
   case "$1" in
-  -x) exec_shell ; ;;
+  -f) fixlibs ; exit 0 ; ;;
+  -fi)
+    for a in `fixlibs` ; do
+      cp $a ${PREFIX}/lib
+      echo $(basename $a) >> ${NFODIR}/.fixedlibs
+    done
+    exit 0
+    ;;
+  -fl) cat ${NFODIR}/.fixedlibs ; exit 0 ; ;;
+  -fd)
+    for a in $(cat ${NFODIR}/.fixedlibs) ; do
+      echo $a
+      rm -f ${PREFIX}/lib/$a
+    done
+    :> ${NFODIR}/.fixedlibs
+    exit 0
+    ;;
+  -x) shift ; exec_shell $@ ; ;;
   -h) help ; ;;
   -c|-C|-i|-I|-u|-d) DO=$1 ; ;;
   -s)
@@ -307,6 +346,18 @@ while [ -n "$1" ]; do
        . ${PKGDIR}/$a
        printf "%20s  $DESC\n" $a
      done ; exit 0 ; ;;
+  -ll)
+     cd ${NFODIR}
+     for a in `echo *`; do
+       if [ -e "${NFODIR}/$a/slpm.nfo" ]; then
+         . ${NFODIR}/$a/slpm.nfo
+         printf "%20s  $DESC\n" $a
+       else
+         printf "%20s  (no description)\n" $a
+       fi
+     done
+     exit 0
+    ;;
   -l)
     if [ -z "$2" ]; then
       ls "$NFODIR" | cat ; exit 0
@@ -370,7 +421,7 @@ pkg_open() {
   if [ -z "${TYPE}" ]; then echo "No TYPE defined in package"; fi
   for DEP in ${DEPS}; do
     if [ ! -e "${NFODIR}/${DEP}" ]; then
-      echo "=> Installing missing dependency.."
+      echo "=> Installing missing dependency ${DEP}"
       $0 -i ${DEP}
       if [ ! $? = 0 ]; then
         echo "=> Install of ${DEP} has failed"
