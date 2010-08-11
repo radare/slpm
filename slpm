@@ -306,8 +306,8 @@ exec_shell() {
   exit $?
 }
 
-[ ! -e "${NFODIR}/.fixedlibs" ] && :> ${NFODIR}/.fixedlibs
 mkdir -p "${NFODIR}" "${WRKDIR}" "${BINPKGDIR}"
+[ ! -e "${NFODIR}/.fixedlibs" ] && touch ${NFODIR}/.fixedlibs
 
 DO=
 while [ -n "$1" ]; do
