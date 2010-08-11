@@ -152,7 +152,7 @@ pkg_chksum() {
     echo "Cannot find chksum database for $PKG"
     return
   fi
-  echo "# package ${PKG}"
+  echo "# ${PKG}"
   for a in `cat $NFODIR/$PKG/files` ; do
     orig=`grep $a$ $NFODIR/$PKG/chksum | awk '{print $1}'`
     cur=`$CHKSUM ${DESTDIR}/${PREFIX}/$a | awk '{print $1}'`
@@ -216,7 +216,8 @@ pkg_register() {
   mkdir -p "$NFODIR/$PKG"
   if [ -n "`ls`" ]; then
     _pfx=`pwd | cut -c 2-`
-    find * -type f | sed -e "s,$_pfx,," > "$NFODIR/$PKG/files"
+    (find * -type f ; find * -type l ) | \
+      sed -e "s,$_pfx,," > "$NFODIR/$PKG/files"
     echo "=> Create binary package: ${BINPKGDIR}/slpm-${PKG}.tgz"
     cp ${PKGDIR}/${PKG} slpm.nfo
     tar czf ${BINPKGDIR}/slpm-${PKG}.tgz *
