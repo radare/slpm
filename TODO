@@ -4,6 +4,10 @@
 * Add support to copy config.h in dwm for example..
 * Add support for python setuptools based packages
 * Fix doblog install DESTDIR
-* Add support for remote repostories (-I)
+* Add support for remote repostories 
+  config: REMOTE=http://nopcode.org/slpm/
+  $ slpm -i pkg # if ${REMOTE} != there uses ${WGET} to download the file if not exist in local path (rsync?)
 * Add specific configure flags per pkg or globally
 * Add a list of ignored packages on dependencies to use system ones
+* Add command to find and register missing libraries, take them from system
+  - like in mirror.pl
