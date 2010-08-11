@@ -1,0 +1,3 @@
+URL=http://hg.youterm.com/mesure
+TYPE=hg
+DESC="measure tool for files, disk, network, data"

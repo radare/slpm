@@ -1,9 +1,18 @@
 # Configuration shellscript for slpm
 
-DESTDIR="${ROOT}/_prefix"
-PREFIX="/"
+# for system wide use
+#DESTDIR="${ROOT}/_prefix"
+#PREFIX="/"
+
+# for chroot friendly
+PREFIX="${ROOT}/_prefix"
+DESTDIR="/"
+
 #PREFIX="/usr"
 
+#DODEPS=0
+
+IGNEXE=0 # set to '1' to ignore .configure_executed and .build_executed
 CHKSUM=md5sum
 
 # Directory to store binary packages
@@ -16,4 +25,4 @@ EXTRA_CFGARGS=""
 
 # TODO: user-defined-per-package cflags or extra-cfgargs
 
-export CFLAGS LDFLAGS EXTRA_CFGARGS
+export CFLAGS LDFLAGS EXTRA_CFGARGS CHKSUM

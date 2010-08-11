@@ -1,0 +1,3 @@
+URL=http://hg.youterm.com/rss2html
+TYPE=hg
+DESC="rss downloader, parser and translator"

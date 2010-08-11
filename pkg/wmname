@@ -1,0 +1,4 @@
+URL=http://hg.suckless.org/wmname
+TYPE=hg
+DESC="sets/prints window manager name similiar to hostname"
+DEPS=

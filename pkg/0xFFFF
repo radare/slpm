@@ -1,0 +1,4 @@
+URL=http://hg.youterm.com/0xFFFF
+DESC="Free Fiasco Firmware Flasher"
+TYPE=hg
+DEPS=libusb

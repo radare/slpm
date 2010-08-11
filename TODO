@@ -1,5 +1,9 @@
-* Support pkgname without version
 * Support to pass source pkgname with fullpath
 * 9base has some warnings. push patch
   - there is no way to patch sources
 * Add support to copy config.h in dwm for example..
+* Add support for python setuptools based packages
+* Fix doblog install DESTDIR
+* Add support for remote repostories (-I)
+* Add specific configure flags per pkg or globally
+* Add a list of ignored packages on dependencies to use system ones

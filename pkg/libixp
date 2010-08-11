@@ -1,0 +1,3 @@
+URL=http://hg.suckless.org/libixp
+TYPE=hg
+DESC="minimalist 9P client/server library for Unix, developed from scratch"

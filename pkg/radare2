@@ -1,0 +1,3 @@
+URL=http://radare.org/hg/radare2
+TYPE=hg
+DESC="advanced hexadecimal editor and debugger (2nd version)"

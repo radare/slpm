@@ -11,11 +11,13 @@ whereami() {
   done
   echo $1
 }
+
 BIN="`readlink $0`"
 [ -z "${BIN}" ] && BIN=$0
 [ -z "${BIN}" ] && BIN=/bin/sh # XXX?
 ARG0="`whereami $BIN`"
 ROOT="`dirname $ARG0`"
+IGNEXE=0
 USRDIR="${HOME}/.slpm"
 WRKDIR="${ROOT}/_work"
 PKGDIR="${ROOT}/pkg"
@@ -24,6 +26,7 @@ CHKSUM=md5sum
 MAKE=make
 . "${ROOT}/config"
 NFODIR="${DESTDIR}/${PREFIX}/var/lib/slpm/pkg"
+BINPKG=0
 
 # XXX a bit spaguetti
 hg_fetch() {
@@ -94,12 +97,14 @@ pkg_build() {
     exit 1
   fi
   cd "$WRKDIR/$PKG/${BASEDIR}"
+  [ "${IGNEXE}" = 1 ] && rm -f .configure_executed .build_executed
   if [ -e .configure_executed ]; then
-    echo "Not running ./configure because of .configure_executed"
+    echo "=> Not running ./configure because of .configure_executed"
   else
     if [ -n "${PKGCONFIGURE}" ]; then
       ${PKGCONFIGURE}
     else
+      chmod +x configure
       if [ -x "configure" ]; then
         ./configure "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
         if [ ! $? = 0 ]; then
@@ -110,7 +115,16 @@ pkg_build() {
     fi
     :> .configure_executed
   fi
-  ${MAKE} DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}
+  if [ -e .build_executed ]; then
+    echo "=> Not running ${MAKE} because of .build_executed"
+  else
+    ${MAKE} DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}
+    if [ ! $? = 0 ]; then
+      echo "=> Make stage failed :("
+      exit 1
+    fi
+    :> .build_executed
+  fi
 }
 
 pkg_install() {
@@ -217,6 +231,7 @@ pkg_register() {
 
 pkg_clean() {
   cd "$WRKDIR/$PKG"
+  rm -f .configure_executed .build_executed
   ${MAKE} clean
 }
 
@@ -238,8 +253,7 @@ help() {
   echo "Usage: slpm [-iudlLx] [pkg pkg ..]"
   echo " -x : execute or enter into the slpm shell"
   echo " -u : upgrade package"
-  echo " -i : install package"
-  echo " -I : install binary package (slpm-*.tgz)"
+  echo " -i : install package (.tgz or pkgname)"
   echo " -d : deinstall package"
   echo " -c : clean package"
   echo " -C : check checksum of pkg files (u,m=un,modified)"
@@ -259,7 +273,7 @@ exec_shell() {
     echo "Cannot find shell. Please install dash, busybox or 9base"
     exit 1
   fi
-  PATH=${PREFIX}/bin:${PREFIX}/sbin:${PATH}
+  PATH=${DESTDIR}${PREFIX}/bin:${DESTDIR}${PREFIX}/sbin:${PATH}
   MANPATH=${PREFIX}/share/man:${MANPATH}
   LD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
   PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
@@ -292,14 +306,14 @@ while [ -n "$1" ]; do
       ls "$NFODIR" | cat ; exit 0
     else
       if [ ! -d "$NFODIR/$2" ]; then
-        PKG=`basename $NFODIR/$2* 2> /dev/null` # autocomplete
-        if [ ! -d "$NFODIR/$PKG" ]; then
+        PKGNAME=`basename $NFODIR/$2* 2> /dev/null` # autocomplete
+        if [ ! -d "$NFODIR/$PKGNAME" ]; then
           echo "Package $2 not installed" ; exit 1
         else
-          cat "$NFODIR/$PKG/files" ; exit 0
+          cat "$NFODIR/$PKGNAME/files" ; exit 0
         fi
       else
-        cat "$NFODIR/$PKG/files" ; exit 0
+        cat "$NFODIR/$2/files" ; exit 0
       fi
     fi
     ;;
@@ -310,6 +324,7 @@ while [ -n "$1" ]; do
 done
 
 pkg_open() {
+  MSG=""
   URL=""
   TYPE=""
   DESC=""
@@ -320,6 +335,7 @@ pkg_open() {
   PKGINSTALL="${MAKE} install"
   PKGINSTALL_ARGS="DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}"
   PKGCONFIGURE=""
+  BINPKG=0
   if [ "`echo $PKG|grep .tgz$`" ]; then
     tar xvzf ${PKG} slpm.nfo
     if [ ! $? = 0 ]; then
@@ -328,6 +344,7 @@ pkg_open() {
     fi
     . ./slpm.nfo
     rm -f slpm.nfo
+    BINPKG=1
     return
   fi
   if [ ! -f "$PKGDIR/$PKG" ]; then
@@ -355,6 +372,14 @@ pkg_open() {
       fi
     fi
   done
+  if [ -n "${MSG}" ]; then
+    echo ""
+    echo "=="
+    echo "  ${MSG}"
+    echo "=="
+    echo ""
+    sleep 2
+  fi
 }
 
 [ -z "$1" ] && help
@@ -364,9 +389,12 @@ while [ -n "$1" ]; do
   case $DO in
   -C) (pkg_chksum) ; ;;
   -c) (pkg_clean) ; ;;
-  -i) (pkg_fetch) ; (pkg_build) ; (pkg_install) ; ;;
-  -I) (binpkg_install) ; ;;
-  -u) (pkg_fetch 1) ; (pkg_build) ; (pkg_install) ; ;;
+  -i) if [ ${BINPKG} = 1 ]; then
+        (binpkg_install)
+      else
+        (pkg_fetch) ; (pkg_build) ; (pkg_install) 
+      fi ; ;;
+  -u) (pkg_fetch 1) ; (pkg_clean) ; (pkg_build) ; (pkg_install) ; ;;
   -d) (pkg_deinstall) ; ;;
   *) (pkg_fetch) ; ;;
   esac

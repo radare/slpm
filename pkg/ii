@@ -1,0 +1,4 @@
+URL=http://hg.suckless.org/ii
+TYPE=hg
+DESC="irc it, simple FIFO based irc client"
+DEPS=

@@ -1,0 +1,4 @@
+URL=http://hg.youterm.com/screws
+TYPE=hg
+DESC="scripting based web server"
+MSG="This package is broken. code in hg needs to be fixed"

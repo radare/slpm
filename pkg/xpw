@@ -1,0 +1,4 @@
+URL=http://hg.youterm.com/xpw
+TYPE=hg
+DESC="X piped widgets"
+MSG="No make install for this package"

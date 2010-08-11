@@ -1,0 +1,3 @@
+URL=http://downloads.sourceforge.net/project/swig/swig/swig-2.0.0/swig-2.0.0.tar.gz
+TYPE=tar
+DESC="Interface compiler that connects programs written in C or C++ to python, java, perl .."

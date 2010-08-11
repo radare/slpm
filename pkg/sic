@@ -1,0 +1,4 @@
+URL=http://hg.suckless.org/sic
+TYPE=hg
+DESC="simple irc client"
+DEPS=
