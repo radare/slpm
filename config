@@ -8,6 +8,9 @@
 PREFIX="${ROOT}/_prefix"
 DESTDIR="/"
 
+WGET="wget -c"
+REMOTE= #http://nopcode.org/slpm
+
 #PREFIX="/usr"
 
 #DODEPS=0

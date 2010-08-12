@@ -394,6 +394,18 @@ pkg_open() {
   PKGINSTALL_ARGS="DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}"
   PKGCONFIGURE=""
   BINPKG=0
+  if [ -n "${REMOTE}" ]; then
+    here=$(pwd)
+    cd ${BINPKGDIR}
+    eval ${WGET} ${REMOTE}/slpm-${PKG}.tgz
+    if [ $? = 0 ]; then
+      PKG=${BINPKGDIR}/slpm-${PKG}.tgz
+    else
+      echo "=> Cannot find this package remotely"
+    fi
+    cd ${here}
+  fi
+
   if [ "`echo $PKG|grep .tgz$`" ]; then
     tar xvzf ${PKG} slpm.nfo
     if [ ! $? = 0 ]; then
