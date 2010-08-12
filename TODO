@@ -10,11 +10,7 @@ slpm
 * Add specific src base directory swig/ for radare2-swig f.ex
 * CONFLICT= in pkgs
 * Allow to symstall to real system (check conflicts before install)
+  $ slpm -I ?
 * Add support for remote repostories 
   config: REMOTE=http://nopcode.org/slpm/
   $ slpm -i pkg # if ${REMOTE} != there uses ${WGET} to download the file if not exist in local path (rsync?)
-
-genpkg
-======
-* Ignore directories /usr/share/doc f.ex..
-* Add support for gentoo and pkgsrc

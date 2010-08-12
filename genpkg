@@ -22,7 +22,7 @@ gentoo_version() {
 }
 
 debian_files() {
-  dpkg -L $1
+  dpkg -L $1 | grep -v /$
   desc=$(dpkg -s $1 | grep Descrip | cut -d : -f 2- | cut -c 2-)
   echo "DESC=\"${desc}\"" > slpm.nfo
   echo "URL=\"none\"" >> slpm.nfo
@@ -33,7 +33,7 @@ debian_version() {
 }
 
 arch_files() {
-  pacman -Ql $1 | cut -d ' ' -f 2-
+  pacman -Ql $1 | cut -d ' ' -f 2- | grep -v /$
   desc=$(pacman -Qi $1 | grep Descr | cut -d : -f 2- | cut -c 2-)
   url=$(pacman -Qi $1 | grep URL | cut -d : -f 2- | cut -c 2-)
   echo "DESC=\"$desc\"" > slpm.nfo
@@ -77,16 +77,10 @@ cd .tmp
     files=`${distro}_files $pkg`
     for a in $files ; do
       [ -z "`echo $a | $igncmd `" ] && continue
-      if [ -n "`echo $a|grep /$`" ]; then
-        echo mkdir $a
-        mkdir -p ./$a
-      fi
-    done
-  
-    for a in $files ; do
-      [ -z "`echo $a | $igncmd `" ] && continue
+      dir=$(dirname $a)
+      mkdir -p ./$dir
       if [ -z "`echo $a|grep /$`" ]; then
-        echo cp $a
+        echo $a
         cp -fa $a ./$a
       fi
     done

@@ -8,11 +8,14 @@ fi
 
 fs=10
 img=image.ext2
+mkfs=mke2fs
+msg="\x1b[47m  \x1b[0m"
 
 # basic devices
 cd _prefix
   mkdir -p dev/pts proc sys
   cd dev
+    rm -f console tty null zero
     mknod -m 660 console c 5 1
     mknod -m 660 tty c 5 0
     mknod -m 660 null c 1 3
@@ -22,9 +25,18 @@ cd ..
 
 sz=$(printf %d $(du -hs _prefix|awk '{print $1}') 2>/dev/null)
 sz=$(($sz+$fs))M
-echo size=$sz
+printf "$msg image size: $sz\n"
 
-echo "creating raw disk in $img.. of $sz"
+cancel() {
+  printf "\n$msg ^C operation cancelled\n"
+  umount .mnt
+  rm -rf .mnt
+  rm -f $img
+  exit 1
+}
+trap cancel INT
+
+printf "$msg create raw disk: $img\n"
 rm -f $img
 # normal
 #dd if=/dev/zero of=image.ext2 count=1 bs=$sz
@@ -32,10 +44,10 @@ rm -f $img
 #dd if=/dev/zero of=$img bs=1k count=0 seek=$sz
 truncate -s $sz $img
 
-echo "creating ext2 image.."
-yes | mke2fs $img
+printf "$msg format: $mkfs\n"
+yes | $mkfs $img
 
-echo "copying contents from _prefix.."
+printf "$msg source root: _prefix\n"
 mkdir -p .mnt
 mount -o loop $img .mnt
 cp -rfa _prefix/* .mnt
@@ -43,8 +55,8 @@ umount .mnt
 sync
 rm -rf .mnt
 
-echo "done"
+printf "$msg done\n"
 
 echo
-echo 'qemu -kernel /tmp/bzImage -hda $img -append "root=/dev/sda init=/bin/dash"'
+printf "$msg qemu -kernel /tmp/bzImage -hda $img -append 'root=/dev/sda init=/bin/dash'\n"
 echo
