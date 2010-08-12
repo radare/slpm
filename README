@@ -1,2 +1,6 @@
 SLPM: suck-less package manage
 ==============================
+
+Make it bootable
+================
+mkdir -p dev proc sys

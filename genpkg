@@ -1,0 +1,56 @@
+#!/bin/sh
+
+version=""
+
+arch_files() {
+	pacman -Ql $1 | cut -d ' ' -f 2-
+	desc=$(pacman -Qi $1 | grep Descr | cut -d : -f 2- | cut -c 2-)
+	url=$(pacman -Qi $1 | grep URL | cut -d : -f 2- | cut -c 2-)
+	echo "DESC=\"$desc\"" > slpm.nfo
+	echo "URL=\"$url\"" >> slpm.nfo
+	echo "TYPE=genpkg" >> slpm.nfo
+}
+
+arch_version() {
+	pacman -Qi $1 | grep Version | awk '{print $3}'
+}
+
+usage() {
+  echo "Usage: genpkg [arch|debian|gentoo|pkgsrc] [pkgname]"
+  exit 1
+}
+
+[ -z "$2" ] && usage
+
+case "$1" in
+"arch")
+  ;;
+*)
+  usage
+  ;;
+esac
+pkg=$2
+
+rm -rf .tmp
+mkdir -p .tmp
+cd .tmp
+  files=`arch_files $pkg`
+  for a in $files ; do
+    if [ -n "`echo $a|grep /$`" ]; then
+      echo mkdir $a
+      mkdir -p ./$a
+    fi
+  done
+
+  for a in $files ; do
+    if [ -z "`echo $a|grep /$`" ]; then
+      echo cp $a
+      cp -fa $a ./$a
+    fi
+  done
+  version=$(arch_version $pkg)
+  tar cpzf ../slpm-${pkg}-${version}.tgz *
+  echo
+  echo slpm-${pkg}-${version}.tgz
+cd ..
+rm -rf .tmp

@@ -263,9 +263,11 @@ pkg_deinstall() {
     done
     rm -rf "$NFODIR/$PKG"
   else
-    cd "$WRKDIR/$PKG"
+    if [ -d "$WRKDIR/$PKG" ]; then
+      cd "$WRKDIR/$PKG"
 # TODO: wrap into ${PKGDEINSTALL}
-    ${MAKE} uninstall DESTDIR=${DESTDIR} PREFIX=${PREFIX}
+      ${MAKE} uninstall DESTDIR=${DESTDIR} PREFIX=${PREFIX}
+    fi
   fi
 }
 
@@ -419,6 +421,25 @@ pkg_open() {
     BINPKG=1
     return
   fi
+
+# hack to support to uninstall packages without finding the pkg description
+# XXX this needs to be fixed
+if [ "$DO" = "-d" ]; then
+  if [ -f "$NFODIR/$PKG/slpm.nfo" ]; then
+    . "${NFODIR}/$PKG/slpm.nfo"
+  else
+    PKG2=`basename $NFODIR/$PKG* 2> /dev/null` # autocomplete
+    if [ -f "$NFODIR/$PKG2/slpm.nfo" ]; then
+      . "${NFODIR}/${PKG2}/slpm.nfo"
+      PKG=$PKG2
+    else
+      echo "Cannot find $PKG"
+      exit 1
+    fi
+  fi
+  return
+fi
+
   if [ ! -f "$PKGDIR/$PKG" ]; then
     PKG2=`basename $PKGDIR/$PKG* 2> /dev/null` # autocomplete
     if [ ! -f "$PKGDIR/$PKG2" ]; then
