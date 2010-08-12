@@ -18,7 +18,7 @@ gentoo_files() {
   echo "TYPE=genpkg" >> slpm.nfo
 }
 gentoo_version() {
-  emerge -s $1 | grep "version installed" | awk '{print $4}'
+  emerge -s $1 | grep "version installed" | awk '{print $4}' | grep -v "\["
 }
 
 debian_files() {
