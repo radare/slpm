@@ -1,4 +1,4 @@
 URL=http://hg.youterm.com/doblog
 TYPE=hg
 DESC="commandline blog and administration tool"
-MSG="This package is broken"
+MSG="Install target is broken. Not honoring DESTDIR"

@@ -1,15 +1,20 @@
+slpm
+====
 * Support to pass source pkgname with fullpath
 * 9base has some warnings. push patch
-  - there is no way to patch sources
 * Add support to copy config.h in dwm for example..
 * Add support for python setuptools based packages
-* Fix doblog install DESTDIR
-* Add support for remote repostories 
-  config: REMOTE=http://nopcode.org/slpm/
-  $ slpm -i pkg # if ${REMOTE} != there uses ${WGET} to download the file if not exist in local path (rsync?)
 * Add specific configure flags per pkg or globally
 * Add a list of ignored packages on dependencies to use system ones (SYSDEPS=...)
-* add support for revision
+* Add support for revision
 * Add specific src base directory swig/ for radare2-swig f.ex
 * CONFLICT= in pkgs
 * Allow to symstall to real system (check conflicts before install)
+* Add support for remote repostories 
+  config: REMOTE=http://nopcode.org/slpm/
+  $ slpm -i pkg # if ${REMOTE} != there uses ${WGET} to download the file if not exist in local path (rsync?)
+
+genpkg
+======
+* Ignore directories /usr/share/doc f.ex..
+* Add support for gentoo and pkgsrc

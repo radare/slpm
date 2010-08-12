@@ -28,4 +28,6 @@ EXTRA_CFGARGS=""
 
 # TODO: user-defined-per-package cflags or extra-cfgargs
 
-export CFLAGS LDFLAGS EXTRA_CFGARGS CHKSUM
+IGNDIRS="/usr/share/locale /usr/share/doc"
+
+export CFLAGS LDFLAGS EXTRA_CFGARGS CHKSUM IGNDIRS

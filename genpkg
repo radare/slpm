@@ -1,56 +1,98 @@
 #!/bin/sh
+# --pancake // 2010
 
-version=""
+. ./config
+
+if [ -n "${IGNDIRS}" ]; then
+  igncmd="grep -v $(echo -e$IGNDIRS | sed -e 's, , -e,g')"
+else
+  igncmd="cat"
+fi
+export igncmd
+
+gentoo_files() {
+  qlist $1
+  desc=$(emerge -s $1 | grep Description | awk -F : '{print $2}')
+  echo "DESC=\"${desc}\"" > slpm.nfo
+  echo "URL=\"none\"" >> slpm.nfo
+  echo "TYPE=genpkg" >> slpm.nfo
+}
+gentoo_version() {
+  emerge -s $1 | grep "version installed" | awk '{print $4}'
+}
+
+debian_files() {
+  dpkg -L $1
+  desc=$(dpkg -s $1 | grep Descrip | cut -d : -f 2- | cut -c 2-)
+  echo "DESC=\"${desc}\"" > slpm.nfo
+  echo "URL=\"none\"" >> slpm.nfo
+  echo "TYPE=genpkg" >> slpm.nfo
+}
+debian_version() {
+  dpkg -s $1 | grep Version | cut -d : -f 2- | cut -c 2-
+}
 
 arch_files() {
-	pacman -Ql $1 | cut -d ' ' -f 2-
-	desc=$(pacman -Qi $1 | grep Descr | cut -d : -f 2- | cut -c 2-)
-	url=$(pacman -Qi $1 | grep URL | cut -d : -f 2- | cut -c 2-)
-	echo "DESC=\"$desc\"" > slpm.nfo
-	echo "URL=\"$url\"" >> slpm.nfo
-	echo "TYPE=genpkg" >> slpm.nfo
+  pacman -Ql $1 | cut -d ' ' -f 2-
+  desc=$(pacman -Qi $1 | grep Descr | cut -d : -f 2- | cut -c 2-)
+  url=$(pacman -Qi $1 | grep URL | cut -d : -f 2- | cut -c 2-)
+  echo "DESC=\"$desc\"" > slpm.nfo
+  echo "URL=\"$url\"" >> slpm.nfo
+  echo "TYPE=genpkg" >> slpm.nfo
 }
-
 arch_version() {
-	pacman -Qi $1 | grep Version | awk '{print $3}'
+  pacman -Qi $1 | grep Version | awk '{print $3}'
 }
 
-usage() {
-  echo "Usage: genpkg [arch|debian|gentoo|pkgsrc] [pkgname]"
+getdistro() {
+  pacman -h >/dev/null 2>&1
+  if [ $? = 2 ]; then echo arch ; return ; fi
+  emerge -h >/dev/null 2>&1
+  if [ $? = 0 ]; then echo gentoo ; return ; fi
+  dpkg -h >/dev/null 2>&1
+  if [ $? = 0 ]; then echo debian ; return ; fi
+}
+
+if [ -z "$1" ]; then
+  echo "Usage: $0 pkg"
   exit 1
-}
+fi
 
-[ -z "$2" ] && usage
-
-case "$1" in
-"arch")
-  ;;
-*)
-  usage
-  ;;
-esac
-pkg=$2
+distro=$(getdistro)
+if [ -z "$distro" ]; then
+  echo "Cannot find pacman, emerge or dpkg."
+  exit 1
+fi
+pkg=$1
+export pkg distro
 
 rm -rf .tmp
 mkdir -p .tmp
 cd .tmp
-  files=`arch_files $pkg`
-  for a in $files ; do
-    if [ -n "`echo $a|grep /$`" ]; then
-      echo mkdir $a
-      mkdir -p ./$a
-    fi
-  done
-
-  for a in $files ; do
-    if [ -z "`echo $a|grep /$`" ]; then
-      echo cp $a
-      cp -fa $a ./$a
-    fi
-  done
-  version=$(arch_version $pkg)
-  tar cpzf ../slpm-${pkg}-${version}.tgz *
-  echo
-  echo slpm-${pkg}-${version}.tgz
+  pkgver=$(${distro}_version $pkg)
+  if [ -z "$pkgver" ]; then
+    echo "Error: unknown package version"
+  else
+    echo version: $pkgver
+    files=`${distro}_files $pkg`
+    for a in $files ; do
+      [ -z "`echo $a | $igncmd `" ] && continue
+      if [ -n "`echo $a|grep /$`" ]; then
+        echo mkdir $a
+        mkdir -p ./$a
+      fi
+    done
+  
+    for a in $files ; do
+      [ -z "`echo $a | $igncmd `" ] && continue
+      if [ -z "`echo $a|grep /$`" ]; then
+        echo cp $a
+        cp -fa $a ./$a
+      fi
+    done
+    tar cpzf ../slpm-${pkg}-${pkgver}.tgz *
+    echo
+    echo slpm-${pkg}-${pkgver}.tgz
+  fi
 cd ..
 rm -rf .tmp

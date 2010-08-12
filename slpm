@@ -302,7 +302,7 @@ exec_shell() {
   PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
   unset PROMPT_COMMAND
   export PATH MANPATH LD_LIBRARY_PATH PKG_CONFIG_PATH
-  if [ -z "$@" ]; then
+  if [ -z "$1" ]; then
     eval ${SHELL}
   else
     eval $@
