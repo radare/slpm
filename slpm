@@ -154,6 +154,7 @@ pkg_install() {
       echo "=> Running pre install script '${INSTALL_PRE}'"
       (cd ${DESTDIR}/${PREFIX} ; eval $INSTALL_PRE)
     fi
+    echo "=> Running: ${PKGINSTALL} ${PKGINSTALL_ARGS}"
     eval ${PKGINSTALL} ${PKGINSTALL_ARGS}
     if [ -n "${INSTALL_POST}" ]; then
       echo "=> Running post install script '${INSTALL_POST}'"
@@ -207,8 +208,8 @@ binpkg_install() {
 }
 
 pkg_register() {
-  [ -d "$NFODIR/$PKG" ] && return
-  cd "$WRKDIR/$PKG"
+  [ -d "$NFODIR/$PKG/${BASEDIR}" ] && return
+  cd "$WRKDIR/$PKG/${BASEDIR}"
   # TODO: move outside and create skel in a standard way
   mkdir -p "${WRKDIR}/.tmp/${PKG}"
   mkdir -p "${WRKDIR}/.tmp/${PKG}/bin"
@@ -219,6 +220,7 @@ pkg_register() {
       echo "=> Running pre install script '${INSTALL_PRE}'"
       (cd ${WRKDIR}/.tmp/${PKG} ; eval $INSTALL_PRE)
     fi
+  echo "=> Running ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" prefix=/"
   eval ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" prefix=/
 #"prefix=${WRKDIR}/.tmp/${PKG}"
 ## XXX: dupped from pkg_install

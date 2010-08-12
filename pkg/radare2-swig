@@ -1,0 +1,4 @@
+URL=http://radare.org/hg/radare2
+BASEDIR=swig
+TYPE=hg
+DESC="vala/swig bindings for radare2"
