@@ -6,7 +6,7 @@ slpm
 * Add support for python setuptools based packages
 * Add specific configure flags per pkg or globally
 * Add a list of ignored packages on dependencies to use system ones (SYSDEPS=...)
-* Add support for revision
+* Add support for hg revision checkouts
 * Add specific src base directory swig/ for radare2-swig f.ex
 * CONFLICT= in pkgs
 * Allow to symstall to real system (check conflicts before install)

@@ -12,14 +12,18 @@ whereami() {
   echo $1
 }
 
-fixlibs() {
- libs=$((
+lslibs() {
   cd ${PREFIX}
   export LD_LIBRARY_PATH=${PREFIX}/lib
-  for bin in `ls bin` ; do
-    ldd bin/$bin | cut -d '>' -f 2- |cut -c 2-| grep ^/ | cut -d ' ' -f 1 | grep -v ${PREFIX}
+  for bin in `find bin usr/bin` ; do
+    [ ! -f $bin ] && continue
+    [ ! -x $bin ] && continue
+    ldd $bin | cut -d '>' -f 2- |cut -c 2-| grep ^/ | cut -d ' ' -f 1 | grep -v ${PREFIX}
   done
- ) | sort | uniq)
+}
+
+fixlibs() {
+ libs=$(lslibs |sort |uniq)
  for a in $libs ; do
    ba=$(basename $a)
    if [ ! -e "${PREFIX}/lib/$ba" ]; then
@@ -43,6 +47,12 @@ MAKE=make
 . "${ROOT}/config"
 NFODIR="${DESTDIR}/${PREFIX}/var/lib/slpm/pkg"
 BINPKG=0
+if [ -n "${SYSDEPS}" ]; then
+  igncmd="grep -v $(echo "-e$SYSDEPS" | sed -e 's, , -e,g')"
+else
+  igncmd="cat"
+fi
+export igncmd
 
 # XXX a bit spaguetti
 hg_fetch() {
@@ -172,7 +182,7 @@ pkg_chksum() {
   echo "# ${PKG}"
   for a in `cat $NFODIR/$PKG/files` ; do
     orig=`grep $a$ $NFODIR/$PKG/chksum | awk '{print $1}'`
-    cur=`$CHKSUM ${DESTDIR}/${PREFIX}/$a | awk '{print $1}'`
+    cur=`$CHKSUM "${DESTDIR}/${PREFIX}/$a" | awk '{print $1}'`
     if [ "$orig" = "$cur" ]; then
       echo ". $orig $cur $a"
     else
@@ -183,11 +193,10 @@ pkg_chksum() {
 
 pkg_register_chksum() {
   PKGNAME=$1
-  (
-  cd ${DESTDIR}/${PREFIX}
-  for a in `cat $NFODIR/$PKGNAME/files` ; do
-      ${CHKSUM} $a 
-  done
+  ( cd ${DESTDIR}/${PREFIX}
+    for a in `cat $NFODIR/$PKGNAME/files` ; do
+      ${CHKSUM} "$a"
+    done
   ) > $NFODIR/$PKGNAME/chksum
 }
 
@@ -456,6 +465,10 @@ fi
   if [ -z "${URL}" ]; then echo "No URL defined in package"; fi
   if [ -z "${TYPE}" ]; then echo "No TYPE defined in package"; fi
   for DEP in ${DEPS}; do
+    if [ -z "`echo $a | $igncmd`" ]; then
+      echo Sysdep $DEP
+      continue
+    fi
     if [ ! -e "${NFODIR}/${DEP}" ]; then
       echo "=> Installing missing dependency ${DEP}"
       $0 -i ${DEP}

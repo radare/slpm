@@ -27,7 +27,7 @@ CFLAGS="-O2 -Wall"
 EXTRA_CFGARGS=""
 
 # TODO: user-defined-per-package cflags or extra-cfgargs
-
+SYSDEPS=""
 IGNDIRS="/usr/share/locale /usr/share/doc"
 
 export CFLAGS LDFLAGS EXTRA_CFGARGS CHKSUM IGNDIRS

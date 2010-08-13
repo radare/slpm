@@ -4,7 +4,7 @@
 . ./config
 
 if [ -n "${IGNDIRS}" ]; then
-  igncmd="grep -v $(echo -e$IGNDIRS | sed -e 's, , -e,g')"
+  igncmd="grep -v $(echo "-e$IGNDIRS" | sed -e 's, , -e,g')"
 else
   igncmd="cat"
 fi
@@ -12,7 +12,7 @@ export igncmd
 
 gentoo_files() {
   qlist $1
-  desc=$(emerge -s $1 | grep Description | awk -F : '{print $2}')
+  desc=$(emerge -s $1 | grep Description | cut -d -f 10-)
   echo "DESC=\"${desc}\"" > slpm.nfo
   echo "URL=\"none\"" >> slpm.nfo
   echo "TYPE=genpkg" >> slpm.nfo
@@ -22,7 +22,7 @@ gentoo_version() {
 }
 
 debian_files() {
-  dpkg -L $1 | grep -v /$
+  dpkg -L $1
   desc=$(dpkg -s $1 | grep Descrip | cut -d : -f 2- | cut -c 2-)
   echo "DESC=\"${desc}\"" > slpm.nfo
   echo "URL=\"none\"" >> slpm.nfo
@@ -77,6 +77,7 @@ cd .tmp
     files=`${distro}_files $pkg`
     for a in $files ; do
       [ -z "`echo $a | $igncmd `" ] && continue
+      [ -d "$a" ] && continue
       dir=$(dirname $a)
       mkdir -p ./$dir
       if [ -z "`echo $a|grep /$`" ]; then
