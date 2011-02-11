@@ -3,3 +3,4 @@ DESC="The GTK+ Toolkit (v3)"
 CFGARGS="--disable-introspection --disable-gtk-doc-html"
 INSTALL_POST="pango-querymodules > ${PREFIX}/etc/pango/pango.modules"
 DEPS="glib gdk-pixbuf pango cairo"
+TYPE=tar

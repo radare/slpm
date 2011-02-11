@@ -404,7 +404,7 @@ done
 pkg_open() {
   MSG=""
   URL=""
-  TYPE=""
+  TYPE="tar"
   DESC=""
   DEPS=""
   CFGARGS=""
