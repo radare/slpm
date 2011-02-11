@@ -54,6 +54,16 @@ else
 fi
 export igncmd
 
+configure_environment() {
+  PATH=${DESTDIR}${PREFIX}/bin:${DESTDIR}${PREFIX}/sbin:${PATH}
+  MANPATH=${PREFIX}/share/man:${MANPATH}
+  LD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
+  PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
+  XDG_DATA_DIRS=${PREFIX}/share:${XDG_DATA_DIRS}
+  unset PROMPT_COMMAND
+  export PATH MANPATH LD_LIBRARY_PATH PKG_CONFIG_PATH XDG_DATA_DIRS
+}
+
 # XXX a bit spaguetti
 hg_fetch() {
   cd $WRKDIR
@@ -118,10 +128,6 @@ pkg_update() {
 }
 
 pkg_build() {
-  if [ ! -d "$WRKDIR/$PKG" ]; then
-    echo "pkg_build: Cannot open target directory"
-    exit 1
-  fi
   cd "$WRKDIR/$PKG/${BASEDIR}"
   [ "${IGNEXE}" = 1 ] && rm -f .configure_executed .build_executed
   if [ -e .configure_executed ]; then
@@ -305,6 +311,7 @@ exec_shell() {
     echo "Cannot find shell. Please install dash, busybox or 9base"
     exit 1
   fi
+  configure_environment
   PATH=${DESTDIR}${PREFIX}/bin:${DESTDIR}${PREFIX}/sbin:${PATH}
   MANPATH=${PREFIX}/share/man:${MANPATH}
   LD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
@@ -489,6 +496,7 @@ fi
 }
 
 [ -z "$1" ] && help
+configure_environment
 while [ -n "$1" ]; do
   PKG=$1
   pkg_open
