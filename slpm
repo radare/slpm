@@ -42,9 +42,14 @@ USRDIR="${HOME}/.slpm"
 WRKDIR="${ROOT}/_work"
 PKGDIR="${ROOT}/pkg"
 BINPKGDIR="${ROOT}/binpkg"
-CHKSUM=md5sum
 MAKE=make
 . "${ROOT}/config"
+md5sum --help >/dev/null 2>&1
+if [ $? = 0 ]; then
+	CHKSUM=md5sum
+else
+	CHKSUM=md5
+fi
 NFODIR="${DESTDIR}/${PREFIX}/var/lib/slpm/pkg"
 BINPKG=0
 if [ -n "${SYSDEPS}" ]; then
@@ -60,7 +65,10 @@ configure_environment() {
   LD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
   PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
   XDG_DATA_DIRS=${PREFIX}/share:${XDG_DATA_DIRS}
+  CFLAGS="-I${PREFIX}/include"
+  LDFLAGS="-L${PREFIX}/lib"
   unset PROMPT_COMMAND
+  export CFLAGS LDFLAGS
   export PATH MANPATH LD_LIBRARY_PATH PKG_CONFIG_PATH XDG_DATA_DIRS
 }
 

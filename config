@@ -16,7 +16,7 @@ REMOTE= #http://nopcode.org/slpm
 #DODEPS=0
 
 IGNEXE=0 # set to '1' to ignore .configure_executed and .build_executed
-CHKSUM=md5sum
+#CHKSUM=md5sum
 
 # Directory to store binary packages
 #BINPKGDIR=/tmp
