@@ -1,7 +1,17 @@
 #!/bin/sh
-# --pancake // 2010
+# --pancake // 2010-2011
 
-. ./config
+whereami() {
+  for a in $PWD `echo $PATH | sed 's,:, ,g'` ; do
+    if [ -e "$a/$1" ]; then
+      echo "$a/$1"
+      return
+    fi
+  done
+  echo $1
+}
+ROOT="`whereami $BIN`"
+. "${ROOT}/config"
 
 if [ -n "${IGNDIRS}" ]; then
   igncmd="grep -v $(echo "-e$IGNDIRS" | sed -e 's, , -e,g')"
@@ -44,6 +54,18 @@ arch_version() {
   pacman -Qi $1 | grep Version | awk '{print $3}'
 }
 
+port_files() {
+  port contents $1 | cut -c 3-
+  desc=$(port info $1 | grep Description | cut -c 23-)
+  url=$(port info $1 | grep Homepage | awk '{print $2}')
+  echo "DESC=\"$desc\"" > slpm.nfo
+  echo "URL=\"$url\"" >> slpm.nfo
+  echo "TYPE=genpkg" >> slpm.nfo
+}
+port_version() {
+  port info xz | head -n 1 | cut -d '@' -f 2 | awk '{print $1}'
+}
+
 getdistro() {
   pacman -h >/dev/null 2>&1
   if [ $? = 2 ]; then echo arch ; return ; fi
@@ -51,16 +73,19 @@ getdistro() {
   if [ $? = 0 ]; then echo gentoo ; return ; fi
   dpkg -h >/dev/null 2>&1
   if [ $? = 0 ]; then echo debian ; return ; fi
+  port help >/dev/null 2>&1
+  if [ $? = 0 ]; then echo port ; return ; fi
 }
 
 if [ -z "$1" ]; then
-  echo "Usage: $0 pkg"
+  echo "Usage: $0 [pkgname]"
+  echo "Supports osx-ports, debian, gentoo and pacman packages"
   exit 1
 fi
 
 distro=$(getdistro)
 if [ -z "$distro" ]; then
-  echo "Cannot find pacman, emerge or dpkg."
+  echo "Cannot find port, pacman, emerge or dpkg programs."
   exit 1
 fi
 pkg=$1

@@ -1,5 +1,5 @@
 #!/bin/sh
-# suckless package manager @ 2009-2010
+# suckless package manager @ 2009-2011
 # - pancake at nopcode dot org
 
 whereami() {
@@ -448,7 +448,17 @@ while [ -n "$1" ]; do
   shift
 done
 
+show_msg() {
+  echo ""
+  echo "=="
+  echo "  ${1}"
+  echo "=="
+  echo ""
+  sleep 1
+}
+
 pkg_open() {
+  PREMSG=""
   MSG=""
   URL=""
   TYPE="tar"
@@ -518,6 +528,7 @@ fi
   # TODO: check package variables
   if [ -z "${URL}" ]; then echo "No URL defined in package"; fi
   if [ -z "${TYPE}" ]; then echo "No TYPE defined in package"; fi
+  [ -n "${PREMSG}" ] && show_msg "pkg_open: ${PKG}: ${PREMSG}"
   for DEP in ${DEPS}; do
     if [ -z "`echo $a | $igncmd`" ]; then
       printf "=> Checking dependency $DEP"
@@ -539,14 +550,7 @@ fi
       fi
     fi
   done
-  if [ -n "${MSG}" ]; then
-    echo ""
-    echo "=="
-    echo "  ${MSG}"
-    echo "=="
-    echo ""
-    sleep 1
-  fi
+  [ -n "${MSG}" ] && show_msg "pkg_open: ${PKG} ${MSG}"
 }
 
 [ -z "$1" ] && help

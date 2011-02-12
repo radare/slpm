@@ -6,5 +6,5 @@ all:
 install:
 	mkdir -p ${DESTDIR}${PREFIX}/bin
 	ln -fs $${PWD}/slpm ${DESTDIR}${PREFIX}/bin/slpm
-	ln -fs $${PWD}/genpkg ${DESTDIR}${PREFIX}/bin/slpm-genpkg
-	ln -fs $${PWD}/genimg ${DESTDIR}${PREFIX}/bin/slpm-genimg
+	ln -fs $${PWD}/slpm-genpkg ${DESTDIR}${PREFIX}/bin/slpm-genpkg
+	ln -fs $${PWD}/slpm-genimg ${DESTDIR}${PREFIX}/bin/slpm-genimg
