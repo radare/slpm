@@ -61,6 +61,9 @@ fi
 export igncmd
 
 configure_environment() {
+  if [ -f "$PREFIX/etc/profile" ]; then
+    . ${PREFIX}/etc/profile
+  fi
   PATH=${DESTDIR}${PREFIX}/bin:${DESTDIR}${PREFIX}/sbin:${PATH}
   MANPATH=${PREFIX}/share/man:${MANPATH}
   LD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
@@ -191,7 +194,7 @@ pkg_build() {
   if [ -e .build_executed ]; then
     echo "=> Not running ${MAKE} because of .build_executed"
   else
-    ${MAKE} DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}
+    ${MAKE} ${MAKEFLAGS} DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}
     if [ ! $? = 0 ]; then
       echo "=> Make stage failed :("
       exit 1
@@ -349,6 +352,7 @@ exec_shell() {
   [ -x "${PREFIX}/bin/rc" ] && SHELL="${PREFIX}/bin/rc"
   [ -x "${PREFIX}/bin/ksh" ] && SHELL="${PREFIX}/bin/ksh"
   [ -x "${PREFIX}/bin/dash" ] && SHELL="${PREFIX}/bin/dash"
+  [ -x "${PREFIX}/bin/bash" ] && SHELL="${PREFIX}/bin/bash"
   [ -x "${PREFIX}/bin/sh" ] && SHELL="${PREFIX}/bin/sh"
   if [ -z "${SHELL}" ]; then
     echo "Cannot find shell. Please install dash, busybox or 9base"

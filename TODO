@@ -5,12 +5,11 @@ slpm
 * Add support to copy config.h in dwm for example..
 * Add support for python setuptools based packages
 * Add specific configure flags per pkg or globally
-* Add a list of ignored packages on dependencies to use system ones (SYSDEPS=...)
 * Add support for hg revision checkouts
 * Add specific src base directory swig/ for radare2-swig f.ex
 * CONFLICT= in pkgs
 * Allow to symstall to real system (check conflicts before install)
   $ slpm -I ?
-* Add support for remote repostories 
+* Add support for remote repositories 
   config: REMOTE=http://nopcode.org/slpm/
   $ slpm -i pkg # if ${REMOTE} != there uses ${WGET} to download the file if not exist in local path (rsync?)

@@ -23,6 +23,7 @@ IGNEXE=0 # set to '1' to ignore .configure_executed and .build_executed
 
 CFLAGS="-O2 -Wall"
 #LDFLAGS="-static"
+MAKEFLAGS="-j4"
 
 EXTRA_CFGARGS=""
 

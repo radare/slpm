@@ -1,0 +1,3 @@
+TYPE=hg
+URL=http://nibble.develsec.org/hg/ssg
+DESC="Simple Slide Generator"
