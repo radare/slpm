@@ -41,6 +41,7 @@ IGNEXE=0
 USRDIR="${HOME}/.slpm"
 WRKDIR="${ROOT}/_work"
 PKGDIR="${ROOT}/pkg"
+PTXDIR="${ROOT}/patches"
 BINPKGDIR="${ROOT}/binpkg"
 MAKE=make
 . "${ROOT}/config"
@@ -68,7 +69,7 @@ configure_environment() {
   CFLAGS="-I${PREFIX}/include"
   LDFLAGS="-L${PREFIX}/lib"
   unset PROMPT_COMMAND
-  export CFLAGS LDFLAGS
+  export CFLAGS LDFLAGS PREFIX
   export PATH MANPATH LD_LIBRARY_PATH PKG_CONFIG_PATH XDG_DATA_DIRS
 }
 
@@ -133,6 +134,38 @@ pkg_fetch() {
 
 pkg_update() {
   hg_fetch $PKG $URL
+}
+
+pkg_patch() {
+  if [ -n "${PATCHES}" ]; then
+    pushd ${WRKDIR}/${PKG}/${BASEDIR} > /dev/null
+    if [ -e .patch_executed ]; then
+      echo "=> Patches already applied."
+    else
+      echo "=> Patching ${PKG}.."
+      for a in ${PATCHES} ; do
+        patch -p1 < ${PTXDIR}/${a}.patch
+      done
+      :> .patch_executed
+    fi
+    popd > /dev/null
+  fi
+}
+
+pkg_unpatch() {
+  if [ -n "${PATCHES}" ]; then
+    pushd ${WRKDIR}/${PKG}/${BASEDIR} >/dev/null
+    if [ -e .patch_executed ]; then
+      echo "=> Unpatching ${PKG}.."
+      for a in ${PATCHES} ; do
+        patch -R -p1 < ${PTXDIR}/${a}.patch
+      done
+      rm -f .patch_executed
+    else
+      echo "=> Patches already not applied."
+    fi
+    popd > /dev/null
+  fi
 }
 
 pkg_build() {
@@ -306,6 +339,8 @@ help() {
   echo " -l : list installed packages or pkg files"
   echo " -L : list all available packages (-LL for description)"
   echo " -f : find missing libraries (-fi: install, -fl: list, -fd: remove)"
+  echo " -p : patch package"
+  echo " -P : unpatch package"
   exit 1
 }
 
@@ -360,7 +395,7 @@ while [ -n "$1" ]; do
     ;;
   -x) shift ; exec_shell $@ ; ;;
   -h) help ; ;;
-  -c|-C|-i|-I|-u|-d) DO=$1 ; ;;
+  -p|-P|-c|-C|-i|-I|-u|-d) DO=$1 ; ;;
   -s)
     if [ -z "$2" ]; then
       echo "Usage: slpm -s [keyword]"
@@ -481,7 +516,14 @@ fi
   if [ -z "${TYPE}" ]; then echo "No TYPE defined in package"; fi
   for DEP in ${DEPS}; do
     if [ -z "`echo $a | $igncmd`" ]; then
-      echo Sysdep $DEP
+      printf "=> Checking dependency $DEP"
+      slpm -l | grep ${DEP}
+      if [ $? = 0 ]; then
+        echo "=> OK"
+      else
+        echo "=> Not found. Installing pkg..."
+        slpm -i ${DEP}
+      fi
       continue
     fi
     if [ ! -e "${NFODIR}/${DEP}" ]; then
@@ -511,12 +553,14 @@ while [ -n "$1" ]; do
   case $DO in
   -C) (pkg_chksum) ; ;;
   -c) (pkg_clean) ; ;;
+  -p) (pkg_patch) ; ;;
+  -P) (pkg_unpatch) ; ;;
   -i) if [ ${BINPKG} = 1 ]; then
         (binpkg_install)
       else
-        (pkg_fetch) ; (pkg_build) ; (pkg_install) 
+        (pkg_fetch) && (pkg_patch) && (pkg_build) && (pkg_install) 
       fi ; ;;
-  -u) (pkg_fetch 1) ; (pkg_clean) ; (pkg_build) ; (pkg_install) ; ;;
+  -u) (pkg_fetch 1) && (pkg_clean) ; (pkg_build) && (pkg_install) ; ;;
   -d) (pkg_deinstall) ; ;;
   *) (pkg_fetch) ; ;;
   esac
