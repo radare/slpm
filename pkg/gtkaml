@@ -1,0 +1,5 @@
+URL="http://gtkaml.googlecode.com/svn/trunk/"
+DESC="Application Markup Language for GTK+Vala"
+DEPS=vala
+TYPE=svn
+PKGCONFIGURE="sh autogen.sh --prefix=${PREFIX}"
