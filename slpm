@@ -61,8 +61,9 @@ fi
 export igncmd
 
 configure_environment() {
-  if [ -f "$PREFIX/etc/profile" ]; then
-    . ${PREFIX}/etc/profile
+  [ -f ${PREFIX}/etc/profile ] && ./ ${PREFIX}/etc/profile
+  if [ -d "${PREFIX}/etc/profile.d" ]; then
+    for a in ${PREFIX}/etc/profile.d/* ; do . $a ; done
   fi
   PATH=${DESTDIR}${PREFIX}/bin:${DESTDIR}${PREFIX}/sbin:${PATH}
   MANPATH=${PREFIX}/share/man:${MANPATH}
@@ -108,7 +109,7 @@ git_fetch() {
       ( cd "$1" ; git pull )
     fi
   else
-    git clone "$2" "$1"
+    git clone ${GITARGS} "$2" "$1"
   fi
 }
 
@@ -133,6 +134,7 @@ tar_fetch() {
 
 pkg_fetch() {
   eval ${TYPE}_fetch $PKG $URL $1
+  eval ${PKG_FETCH}
 }
 
 pkg_update() {
@@ -194,7 +196,11 @@ pkg_build() {
   if [ -e .build_executed ]; then
     echo "=> Not running ${MAKE} because of .build_executed"
   else
-    ${MAKE} ${MAKEFLAGS} DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}
+    if [ -n "${MAKEFUN}" ]; then
+      ${MAKEFUN}
+    else
+      ${MAKE} ${MAKEFLAGS} DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}
+    fi
     if [ ! $? = 0 ]; then
       echo "=> Make stage failed :("
       exit 1
@@ -280,7 +286,8 @@ pkg_register() {
       (cd ${WRKDIR}/.tmp/${PKG} ; eval $INSTALL_PRE)
     fi
   echo "=> Running ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" prefix=/"
-  eval ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" prefix=/
+  eval DESTDIR=${WRKDIR}/.tmp/${PKG} \
+    ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" prefix=/
 #"prefix=${WRKDIR}/.tmp/${PKG}"
 ## XXX: dupped from pkg_install
     if [ -n "${INSTALL_POST}" ]; then
@@ -464,6 +471,7 @@ pkg_open() {
   TYPE="tar"
   DESC=""
   DEPS=""
+  MAKEFUN=""
   CFGARGS=""
   BASEDIR=""
   INSTALL_POST="" # script to run after install

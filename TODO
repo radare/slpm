@@ -1,5 +1,6 @@
 slpm
 ====
+* TODO: rename all .*_executed as .*_done
 * Support to pass source pkgname with fullpath
 * 9base has some warnings. push patch
 * Add support to copy config.h in dwm for example..
