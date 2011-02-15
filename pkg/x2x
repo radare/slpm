@@ -1,0 +1,4 @@
+URL=git://github.com/dottedmag/x2x.git
+TYPE=git
+DESC="x2x mouse and keyboard sharing"
+PRECONFIGURE="sh bootstrap.sh"

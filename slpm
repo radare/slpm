@@ -179,6 +179,9 @@ pkg_build() {
   if [ -e .configure_executed ]; then
     echo "=> Not running ./configure because of .configure_executed"
   else
+    if [ -n "${PRECONFIGURE}" ]; then
+      ${PRECONFIGURE}
+    fi
     if [ -n "${PKGCONFIGURE}" ]; then
       ${PKGCONFIGURE}
     else
