@@ -540,27 +540,29 @@ fi
   if [ -z "${URL}" ]; then echo "No URL defined in package"; fi
   if [ -z "${TYPE}" ]; then echo "No TYPE defined in package"; fi
   [ -n "${PREMSG}" ] && show_msg "pkg_open: ${PKG}: ${PREMSG}"
-  for DEP in ${DEPS}; do
-    if [ -z "`echo $a | $igncmd`" ]; then
-      printf "=> Checking dependency $DEP"
-      slpm -l | grep ${DEP}
-      if [ $? = 0 ]; then
-        echo "=> OK"
-      else
-        echo "=> Not found. Installing pkg..."
-        slpm -i ${DEP}
+  if [ "${DODEPS}" = 1 ]; then
+    for DEP in ${DEPS}; do
+      if [ -z "`echo $a | $igncmd`" ]; then
+        printf "=> Checking dependency $DEP"
+        slpm -l | grep ${DEP}
+        if [ $? = 0 ]; then
+          echo "=> OK"
+        else
+          echo "=> Not found. Installing pkg..."
+          slpm -i ${DEP}
+        fi
+        continue
       fi
-      continue
-    fi
-    if [ ! -e "${NFODIR}/${DEP}" ]; then
-      echo "=> Installing missing dependency ${DEP}"
-      $0 -i ${DEP}
-      if [ ! $? = 0 ]; then
-        echo "=> Install of ${DEP} has failed"
-        exit 1
+      if [ ! -e "${NFODIR}/${DEP}" ]; then
+        echo "=> Installing missing dependency ${DEP}"
+        $0 -i ${DEP}
+        if [ ! $? = 0 ]; then
+          echo "=> Install of ${DEP} has failed"
+          exit 1
+        fi
       fi
-    fi
-  done
+    done
+  fi
   [ -n "${MSG}" ] && show_msg "pkg_open: ${PKG} ${MSG}"
 }
 
