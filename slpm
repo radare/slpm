@@ -18,7 +18,11 @@ lslibs() {
   for bin in `find bin usr/bin` ; do
     [ ! -f $bin ] && continue
     [ ! -x $bin ] && continue
-    ldd $bin | cut -d '>' -f 2- |cut -c 2-| grep ^/ | cut -d ' ' -f 1 | grep -v ${PREFIX}
+    if [ -e /usr/bin/otool ]; then
+      otool -L $bin | grep -v :|awk '{print $1}'
+    else
+      ldd $bin | cut -d '>' -f 2- |cut -c 2-| grep ^/ | cut -d ' ' -f 1 | grep -v ${PREFIX}
+    fi
   done
 }
 
