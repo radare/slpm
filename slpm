@@ -544,6 +544,16 @@ fi
   if [ -z "${URL}" ]; then echo "No URL defined in package"; fi
   if [ -z "${TYPE}" ]; then echo "No TYPE defined in package"; fi
   [ -n "${PREMSG}" ] && show_msg "pkg_open: ${PKG}: ${PREMSG}"
+  if [ -n "${CONFLICT}" ]; then
+    HAS_CONFLICT=no
+    for a in ${CONFLICT} ; do
+      if [ -e "${NFODIR}/$a/slpm.nfo" ]; then
+        echo "Package ${PKG} conflicts with $a"
+        HAS_CONFLICT=yes
+      fi
+    done
+    [ "${HAS_CONFLICT}" = yes ] && exit 1
+  fi
   if [ "${DODEPS}" = 1 ]; then
     for DEP in ${DEPS}; do
       if [ -z "`echo $a | $igncmd`" ]; then
