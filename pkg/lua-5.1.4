@@ -7,5 +7,12 @@ _luamake() {
 }
 PKGINSTALL=_luainstall
 _luainstall() {
-	${MAKE} install INSTALL_TOP=${DESTDIR}
+	# HACK!
+	echo PREFIX=${PREFIX}
+	echo DESTDIR=${DESTDIR}
+	if [ "${DESTDIR}" = / ]; then
+		${MAKE} install INSTALL_TOP=${PREFIX}
+	else
+		${MAKE} install INSTALL_TOP=${DESTDIR}
+	fi
 }
