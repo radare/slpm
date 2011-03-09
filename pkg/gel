@@ -1,0 +1,4 @@
+URL=git://github.com/tigrux/gel
+TYPE=git
+DESC="GObject-based Scheme-like programming language"
+PKGCONFIGURE="sh autogen.sh ; ./configure --prefix=${PREFIX}"
