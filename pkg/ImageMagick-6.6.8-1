@@ -1,0 +1,17 @@
+URL=ftp://ftp.imagemagick.org/pub/ImageMagick/ImageMagick-6.6.8-1.tar.gz
+TYPE=tar
+DESC="Process images from commandline"
+PKGINSTALL=_iminstall
+_iminstall() {
+	# HACK!
+	echo PREFIX=${PREFIX}
+	echo DESTDIR=${DESTDIR}
+	if [ "${DESTDIR}" = / ]; then
+		echo ${MAKE} install prefix=${PREFIX}
+		${MAKE} install prefix=${PREFIX}
+	else
+		echo "Registering package..."
+		echo ${MAKE} install DESTDIR=${DESTDIR} prefix=/ #${DESTDIR}
+		${MAKE} install DESTDIR=${DESTDIR} prefix=/ pkglibdir=/ pkgincludedir=/ pkgdatadir=/ pkglibdir=/ pkglibexecdir=/
+	fi
+}
