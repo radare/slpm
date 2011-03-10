@@ -362,15 +362,19 @@ help() {
 }
 
 exec_shell() {
-  SHELL=""
-  [ -x "${PREFIX}/bin/rc" ] && SHELL="${PREFIX}/bin/rc"
-  [ -x "${PREFIX}/bin/ksh" ] && SHELL="${PREFIX}/bin/ksh"
-  [ -x "${PREFIX}/bin/dash" ] && SHELL="${PREFIX}/bin/dash"
-  [ -x "${PREFIX}/bin/bash" ] && SHELL="${PREFIX}/bin/bash"
-  [ -x "${PREFIX}/bin/sh" ] && SHELL="${PREFIX}/bin/sh"
-  if [ -z "${SHELL}" ]; then
-    echo "Cannot find shell. Please install dash, busybox or 9base"
-    exit 1
+  if [ "${CHROOTABLE}" = 1 ]; then
+    OSHELL=${SHELL}
+    SHELL=""
+    [ -x "${PREFIX}/bin/rc" ] && SHELL="${PREFIX}/bin/rc"
+    [ -x "${PREFIX}/bin/ksh" ] && SHELL="${PREFIX}/bin/ksh"
+    [ -x "${PREFIX}/bin/dash" ] && SHELL="${PREFIX}/bin/dash"
+    [ -x "${PREFIX}/bin/bash" ] && SHELL="${PREFIX}/bin/bash"
+    [ -x "${PREFIX}/bin/sh" ] && SHELL="${PREFIX}/bin/sh"
+    if [ -z "${SHELL}" ]; then
+      echo "Cannot find shell. Please install dash, bash, busybox or 9base"
+      echo "Or set CHROOTABLE=0 in config to disable the chrootable mode"
+      SHELL=${OSHELL}
+    fi
   fi
   configure_environment
   PATH=${DESTDIR}${PREFIX}/bin:${DESTDIR}${PREFIX}/sbin:${PATH}
