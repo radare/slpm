@@ -8,7 +8,6 @@ slpm
 * Add specific configure flags per pkg or globally
 * Add support for hg revision checkouts
 * Add specific src base directory swig/ for radare2-swig f.ex
-* CONFLICT= in pkgs
 * Allow to symstall to real system (check conflicts before install)
   $ slpm -I ?
 * Add support for remote repositories 

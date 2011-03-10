@@ -14,6 +14,7 @@ whereami() {
 
 lslibs() {
   cd ${PREFIX}
+  export DYLD_LIBRARY_PATH=${PREFIX}/lib
   export LD_LIBRARY_PATH=${PREFIX}/lib
   for bin in `find bin usr/bin` ; do
     [ ! -f $bin ] && continue
@@ -72,6 +73,7 @@ configure_environment() {
   PATH=${DESTDIR}${PREFIX}/bin:${DESTDIR}${PREFIX}/sbin:${PATH}
   MANPATH=${PREFIX}/share/man:${MANPATH}
   LD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
+  DYLD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
   PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
   XDG_DATA_DIRS=${PREFIX}/share:${XDG_DATA_DIRS}
   CFLAGS="-I${PREFIX}/include"
@@ -380,9 +382,10 @@ exec_shell() {
   PATH=${DESTDIR}${PREFIX}/bin:${DESTDIR}${PREFIX}/sbin:${PATH}
   MANPATH=${PREFIX}/share/man:${MANPATH}
   LD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
+  DYLD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
   PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
   unset PROMPT_COMMAND
-  export PATH MANPATH LD_LIBRARY_PATH PKG_CONFIG_PATH
+  export PATH MANPATH LD_LIBRARY_PATH PKG_CONFIG_PATH DYLD_LIBRARY_PATH
   if [ -z "$1" ]; then
     eval ${SHELL}
   else
