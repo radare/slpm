@@ -350,8 +350,8 @@ help() {
   echo " -u : upgrade package"
   echo " -i : install package (.tgz or pkgname)"
   echo " -d : deinstall package"
-  echo " -c : clean package"
-  echo " -C : check checksum of pkg files (u,m=un,modified)"
+  echo " -c : clean package (-ci to clean + install)"
+  echo " -C : check checksum of pkg files (u=unmodified, m=modified)"
   echo " -s : search package by keyword"
   echo " -l : list installed packages or pkg files"
   echo " -L : list all available packages (-LL for description)"
@@ -413,6 +413,13 @@ while [ -n "$1" ]; do
     ;;
   -x) shift ; exec_shell $@ ; ;;
   -h) help ; ;;
+  -ci)
+    cmd=$0
+    shift
+    $cmd -c $@
+    $cmd -i $@
+    exit 0
+    ;;
   -p|-P|-c|-C|-i|-I|-u|-d) DO=$1 ; ;;
   -s)
     if [ -z "$2" ]; then
