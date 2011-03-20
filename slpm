@@ -73,7 +73,7 @@ configure_environment() {
   PATH=${DESTDIR}${PREFIX}/bin:${DESTDIR}${PREFIX}/sbin:${PATH}
   MANPATH=${PREFIX}/share/man:${MANPATH}
   LD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
-  DYLD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
+  #DYLD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
   PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
   XDG_DATA_DIRS=${PREFIX}/share:${XDG_DATA_DIRS}
   CFLAGS="-I${PREFIX}/include"
@@ -341,7 +341,7 @@ pkg_deinstall() {
     if [ -d "$WRKDIR/$PKG" ]; then
       cd "$WRKDIR/$PKG"
 # TODO: wrap into ${PKGDEINSTALL}
-      ${MAKE} uninstall DESTDIR=${DESTDIR} PREFIX=${PREFIX}
+      ${MAKE} uninstall DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}
     fi
   fi
 }
