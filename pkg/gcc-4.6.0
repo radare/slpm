@@ -3,4 +3,4 @@ TYPE=tar
 DESC="gcc 4.6"
 DEPS="mpc"
 # --enable-go here!!
-CFGARGS=""
+CFGARGS="--enable-languages=c,c++,go"

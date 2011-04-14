@@ -13,7 +13,7 @@ REMOTE= #http://nopcode.org/slpm
 
 #PREFIX="/usr"
 
-CHROOTABLE=1
+CHROOTABLE=0
 DODEPS=1
 
 IGNEXE=0 # set to '1' to ignore .configure_executed and .build_executed

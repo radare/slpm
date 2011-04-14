@@ -1,17 +1,12 @@
-* add support for .xz files
-packages:
- webkit
- mpfr -- for gcc
- m4
- make
- gawk
- syslinux
- zlib
- e2fsprogs
- curl
-
 slpm
 ====
+* -k to clean/kill
+* choose what to remove from installed packages
+  - remove documentation from packages
+  - remove shared libraries
+  - remove static libraries
+  - remove development files
+  - remove manpages
 * Create toolchain to compile for linux-static
   - to make a static build distro
 * Add command to purge _work/ packages
@@ -29,3 +24,8 @@ slpm
 * Add support for remote repositories 
   config: REMOTE=http://nopcode.org/slpm/
   $ slpm -i pkg # if ${REMOTE} != there uses ${WGET} to download the file if not exist in local path (rsync?)
+
+do want packages:
+================
+ - zlib
+
