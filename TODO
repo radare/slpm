@@ -1,5 +1,21 @@
+* add support for .xz files
+packages:
+ webkit
+ mpfr -- for gcc
+ m4
+ make
+ gawk
+ syslinux
+ zlib
+ e2fsprogs
+ curl
+
 slpm
 ====
+* Create toolchain to compile for linux-static
+  - to make a static build distro
+* Add command to purge _work/ packages
+  - rm -rf _work/$1
 * TODO: rename all .*_executed as .*_done
 * Support to pass source pkgname with fullpath
 * 9base has some warnings. push patch

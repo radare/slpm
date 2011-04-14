@@ -1,6 +1,7 @@
-URL=http://ftp.gnome.org/pub/gnome/sources/gtk+/3.0/gtk+-3.0.2.tar.bz2
+URL=http://ftp.gnome.org/pub/gnome/sources/gtk+/3.0/gtk+-3.1.2.tar.bz2
 DESC="The GTK+ Toolkit (v3)"
 CFGARGS="--disable-introspection --disable-gtk-doc-html"
+CFGARGS="${CFGARGS} --enable-broadway" # enable html5 backend
 [ "$(uname)" = "Darwin" ] && \
   CFGARGS="${CFGARGS} --enable-quartz-backend"
 INSTALL_POST="pango-querymodules > ${PREFIX}/etc/pango/pango.modules"

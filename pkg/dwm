@@ -1,3 +1,5 @@
 URL=http://hg.suckless.org/dwm
 TYPE=hg
 DESC="dynamic window manager"
+CFGFILE="../../patches/dwm-config.h"
+PRECONFIGURE="cp $CFGFILE config.h"
