@@ -1,24 +1,33 @@
+package related issues
+======================
+* 9base has some warnings. push patch
+
 slpm
 ====
-* -k to clean/kill
 * choose what to remove from installed packages
+	FILTER="doc dev man"
+	FILTER="/bin"
+	for a in ${FILTER} ; do
+	  rm -f $(find * | grep $a)
+	done
+	# must remove empty directories
   - remove documentation from packages
   - remove shared libraries
   - remove static libraries
   - remove development files
   - remove manpages
-* Create toolchain to compile for linux-static
-  - to make a static build distro
-* Add command to purge _work/ packages
-  - rm -rf _work/$1
 * TODO: rename all .*_executed as .*_done
 * Support to pass source pkgname with fullpath
-* 9base has some warnings. push patch
-* Add support to copy config.h in dwm for example..
-* Add support for python setuptools based packages
+  - Add support for other pkg repositories
 * Add specific configure flags per pkg or globally
 * Add support for hg revision checkouts
 * Add specific src base directory swig/ for radare2-swig f.ex
+
+Experimental stuff to think on..
+================================
+* Create toolchain to compile for linux-static
+  - to make a static build distro
+* Add support for python setuptools based packages
 * Allow to symstall to real system (check conflicts before install)
   $ slpm -I ?
 * Add support for remote repositories 
