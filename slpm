@@ -427,6 +427,21 @@ while [ -n "$1" ]; do
     $cmd -i $@
     exit 0
     ;;
+  -k)
+    if [ -z "$2" ]; then
+      cd ${WRKDIR} ; ls -F | grep / | sed -e s,/,,
+    else
+      p=`$0 -k | grep $2 | head -n 1`
+      if [ -n "$p" ]; then
+        echo "Killing $p..."
+        cd ${WRKDIR} ; rm -rf $p
+      else
+        echo "No package matching $2"
+        exit 1
+      fi
+    fi
+    exit 0
+    ;;
   -p|-P|-c|-C|-i|-I|-u|-d) DO=$1 ; ;;
   -s)
     if [ -z "$2" ]; then
