@@ -1,0 +1,19 @@
+URL=git://git.etalabs.net/musl
+TYPE=git
+DESC="lightweight, fast, simple and free standard C library"
+PRECONFIGURE=_musl_precfg
+
+_musl_precfg() {
+case `uname -m` in
+i?86)
+	echo "ARCH=i386" > ${WRKDIR}/${PKG}/${BASEDIR}/config.mak
+	;;
+x86_64)
+	echo "ARCH=x86_64" > ${WRKDIR}/${PKG}/${BASEDIR}/config.mak
+	;;
+*)
+	echo "Unsupported architecture" > /dev/stderr
+	exit 1
+	;;
+esac
+}

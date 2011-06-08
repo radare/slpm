@@ -208,7 +208,7 @@ pkg_build() {
     if [ -n "${MAKEFUN}" ]; then
       ${MAKEFUN}
     else
-      ${MAKE} ${MAKEFLAGS} DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}
+      ${MAKE} ${MAKEFLAGS} DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX} exec_prefix=${PREFIX}
     fi
     if [ ! $? = 0 ]; then
       echo "=> Make stage failed :("
@@ -512,7 +512,7 @@ pkg_open() {
   BASEDIR=""
   INSTALL_POST="" # script to run after install
   PKGINSTALL="${MAKE} install"
-  PKGINSTALL_ARGS="DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX}"
+  PKGINSTALL_ARGS="DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX} exec_prefix=${PREFIX}"
   PKGCONFIGURE=""
   BINPKG=0
   if [ -n "${REMOTE}" ]; then
