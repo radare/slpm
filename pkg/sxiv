@@ -1,0 +1,3 @@
+URL=git://github.com/muennich/sxiv.git
+DESC="Suckless image viewer"
+TYPE=git

@@ -1,0 +1,3 @@
+URL=http://hg.suckless.org/sbase/
+TYPE=hg
+DESC="Suckless userland base"
