@@ -50,7 +50,7 @@ PTXDIR="${ROOT}/patches"
 BINPKGDIR="${ROOT}/binpkg"
 MAKE=make
 . "${ROOT}/config"
-md5sum --help >/dev/null 2>&1
+echo | md5sum >/dev/null 2>&1
 if [ $? = 0 ]; then
 	CHKSUM=md5sum
 else
