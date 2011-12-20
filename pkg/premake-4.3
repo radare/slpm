@@ -1,0 +1,9 @@
+URL=http://heanet.dl.sourceforge.net/project/premake/Premake/4.3/premake-4.3-src.zip
+TYPE=tar
+DESC="premake build system"
+BASEDIR=build/gmake.unix/
+PKGINSTALL=_foo
+_foo() {
+	mkdir -p ${DESTDIR}/${PREFIX}/bin
+	cp -f ../../bin/release/premake4 ${DESTDIR}/${PREFIX}/bin
+}

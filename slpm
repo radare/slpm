@@ -234,6 +234,9 @@ pkg_install() {
       (cd ${DESTDIR}/${PREFIX} ; eval $INSTALL_PRE)
     fi
     echo "=> Running: ${PKGINSTALL} ${PKGINSTALL_ARGS}"
+    for a in ${PKGINSTALL_ARGS} ; do
+  	eval export ${a}
+    done
     eval ${PKGINSTALL} ${PKGINSTALL_ARGS}
     if [ -n "${INSTALL_POST}" ]; then
       echo "=> Running post install script '${INSTALL_POST}'"
@@ -249,7 +252,12 @@ pkg_chksum() {
     return
   fi
   echo "# ${PKG}"
-  for a in `cat $NFODIR/$PKG/files` ; do
+  FILES=`cat $NFODIR/$PKG/files`
+  if [ -z "${FILES}" ]; then
+    echo "Is this an empty package?"
+    return
+  fi
+  for a in ${FILES} ; do
     orig=`grep $a$ $NFODIR/$PKG/chksum | awk '{print $1}'`
     cur=`$CHKSUM "${DESTDIR}/${PREFIX}/$a" | awk '{print $1}'`
     if [ "$orig" = "$cur" ]; then
@@ -262,6 +270,11 @@ pkg_chksum() {
 
 pkg_register_chksum() {
   PKGNAME=$1
+  FILES=`cat $NFODIR/$PKG/files`
+  if [ -z "${FILES}" ]; then
+    echo "Is this an empty package?"
+    exit 1
+  fi
   ( cd ${DESTDIR}/${PREFIX}
     for a in `cat $NFODIR/$PKGNAME/files` ; do
       ${CHKSUM} "$a"
@@ -298,9 +311,21 @@ pkg_register() {
       echo "=> Running pre install script '${INSTALL_PRE}'"
       (cd ${WRKDIR}/.tmp/${PKG} ; eval $INSTALL_PRE)
     fi
-  echo "=> Running ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" prefix=/"
-  eval DESTDIR=${WRKDIR}/.tmp/${PKG} \
+  #PKGINSTALL_ARGS="DESTDIR=${DESTDIR} INSTALL_ROOT=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX} exec_prefix=${PREFIX}"
+  PKGINSTALL_ARGS="PREFIX=/ DESTDIR=${WRKDIR}/.tmp/${PKG} prefix=/ exec_prefix=${PREFIX}"
+  for a in ${PKGINSTALL_ARGS} ; do
+  	echo export ${a}
+  	eval export ${a}
+  done
+  eval ${PKGINSTALL} ${PKGINSTALL_ARGS}
+  echo "=> Running ${PKGINSTALL} ${PKGINSTALL_ARGS}"
+  DD=${WRKDIR}/.tmp/${PKG}
+  eval DESTDIR=${DD} INSTALL_ROOT=${DD}  \
     ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" prefix=/
+    if [ ! $? = 0 ]; then
+      echo "=> Install fail"
+      exit 1
+    fi
 #"prefix=${WRKDIR}/.tmp/${PKG}"
 ## XXX: dupped from pkg_install
     if [ -n "${INSTALL_POST}" ]; then
@@ -518,7 +543,7 @@ pkg_open() {
   BASEDIR=""
   INSTALL_POST="" # script to run after install
   PKGINSTALL="${MAKE} install"
-  PKGINSTALL_ARGS="DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX} exec_prefix=${PREFIX}"
+  PKGINSTALL_ARGS="DESTDIR=${DESTDIR} INSTALL_ROOT=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX} exec_prefix=${PREFIX}"
   PKGCONFIGURE=""
   CONFIGURE="./configure"
   BINPKG=0

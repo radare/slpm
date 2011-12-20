@@ -1,0 +1,3 @@
+URL=http://upx.sourceforge.net/download/upx-3.08-src.tar.bz2
+TYPE=tar
+DESC="upx binary compressor"
