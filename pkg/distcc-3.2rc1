@@ -1,0 +1,3 @@
+URL=http://distcc.googlecode.com/files/distcc-3.2rc1.tar.bz2
+TYPE=tar
+DESC="Distributed CC wrapper"
