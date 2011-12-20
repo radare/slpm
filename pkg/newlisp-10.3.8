@@ -1,0 +1,7 @@
+URL=http://www.newlisp.org/downloads/development/newlisp-10.3.8.tgz
+TYPE=tar
+DESC="newlisp programming language"
+PKGINSTALL=_foo
+_foo() {
+	${MAKE} -f makefile_install install DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${DESTDIR}/${PREFIX}
+}

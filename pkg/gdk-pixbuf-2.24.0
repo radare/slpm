@@ -1,4 +1,4 @@
-URL=http://ftp.gnome.org/pub/gnome/sources/gdk-pixbuf/2.22/gdk-pixbuf-2.22.1.tar.bz2
+URL=http://ftp.gnome.org/pub/gnome/sources/gdk-pixbuf/2.24/gdk-pixbuf-2.24.0.tar.bz2
 DESC="gdk pixbuf"
 CFGARGS="--disable-introspection --without-libtiff --disable-gtk-doc-html --disable-glibtest"
 TYPE=tar
