@@ -45,10 +45,13 @@ ROOT="`dirname $ARG0`"
 IGNEXE=0
 USRDIR="${HOME}/.slpm"
 WRKDIR="${ROOT}/_work"
+TMPDIR="${ROOT}/_work/tmp"
 PKGDIR="${ROOT}/pkg"
 PTXDIR="${ROOT}/patches"
 BINPKGDIR="${ROOT}/binpkg"
 MAKE=make
+mkdir -p "${TMPDIR}"
+export TMPDIR
 . "${ROOT}/config"
 echo | md5sum >/dev/null 2>&1
 if [ $? = 0 ]; then
@@ -182,9 +185,9 @@ pkg_unpatch() {
 
 pkg_build() {
   cd "$WRKDIR/$PKG/${BASEDIR}"
-  [ "${IGNEXE}" = 1 ] && rm -f .configure_executed .build_executed
-  if [ -e .configure_executed ]; then
-    echo "=> Not running ./configure because of .configure_executed"
+  [ "${IGNEXE}" = 1 ] && rm -f .slpm_configure_done .slpm_build_done
+  if [ -e .slpm_configure_done ]; then
+    echo "=> Not running ${CONFIGURE} because of .slpm_configure_done"
   else
     if [ -n "${PRECONFIGURE}" ]; then
       ${PRECONFIGURE}
@@ -192,8 +195,8 @@ pkg_build() {
     if [ -n "${PKGCONFIGURE}" ]; then
       ${PKGCONFIGURE}
     else
-      [ -f configure ] && chmod +x configure
-      if [ -x "configure" ]; then
+      [ -f ${CONFIGURE} ] && chmod +x ${CONFIGURE}
+      if [ -x "${CONFIGURE}" ]; then
         ${CONFIGURE} "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
         if [ ! $? = 0 ]; then
           echo "=> Configure stage failed :("
@@ -201,10 +204,10 @@ pkg_build() {
         fi
       fi
     fi
-    :> .configure_executed
+    :> .slpm_configure_done
   fi
-  if [ -e .build_executed ]; then
-    echo "=> Not running ${MAKE} because of .build_executed"
+  if [ -e .slpm_build_done ]; then
+    echo "=> Not running ${MAKE} because of .slpm_build_done"
   else
     if [ -n "${MAKEFUN}" ]; then
       ${MAKEFUN}
@@ -215,7 +218,7 @@ pkg_build() {
       echo "=> Make stage failed :("
       exit 1
     fi
-    :> .build_executed
+    :> .slpm_build_done
   fi
 }
 
@@ -327,7 +330,7 @@ pkg_register() {
 
 pkg_clean() {
   cd "$WRKDIR/$PKG"
-  rm -f .configure_executed .build_executed
+  rm -f .slpm_configure_done .slpm_build_done
   ${MAKE} clean
 }
 

@@ -1,0 +1,8 @@
+URL=http://prdownloads.sourceforge.net/tcl/tcl8.5.11-src.tar.gz
+TYPE=tar
+DESC="Tcl"
+BASEDIR=unix
+PKGINSTALL=_tclinstall
+_tclinstall() {
+	${MAKE} install DESTDIR=${DESTDIR} prefix=/ PREFIX=${PREFIX}
+}

@@ -1,0 +1,3 @@
+URL=git://github.com/luvit/lum.git
+DESC="luvit module manager"
+TYPE=git

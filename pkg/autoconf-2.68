@@ -1,0 +1,3 @@
+URL=http://ftp.gnu.org/gnu/autoconf/autoconf-2.68.tar.gz
+TYPE=tar
+DESC="GNU autoconf"

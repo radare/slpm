@@ -1,0 +1,3 @@
+URL=http://www.openssl.org/source/openssl-1.0.0e.tar.gz
+TYPE=tar
+DESC="OpenSSL library"
