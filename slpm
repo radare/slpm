@@ -131,8 +131,9 @@ tar_fetch() {
     echo "==> Already uncompressed and patched $PKG"
   else
     case "$FILE" in
-    *.gz) tar xzvf $FILE ; ;;
-    *.bz2) tar xjvf $FILE ; ;;
+    *.zip) unzip $FILE ; ;;
+    *.tgz|*.gz) tar xzvf $FILE ; ;;
+    *.tbz2|*.bz2) tar xjvf $FILE ; ;;
     *.xz) xz -d $FILE ; FILE2=`echo $FILE|sed -e s,.xz,,`; tar xvf $FILE2 ; ;;
     esac
   fi
@@ -193,7 +194,7 @@ pkg_build() {
     else
       [ -f configure ] && chmod +x configure
       if [ -x "configure" ]; then
-        ./configure "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
+        ${CONFIGURE} "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
         if [ ! $? = 0 ]; then
           echo "=> Configure stage failed :("
           exit 1
@@ -347,19 +348,21 @@ pkg_deinstall() {
 }
 
 help() {
-  echo "Usage: slpm [-iudlLx] [pkg pkg ..]"
-  echo " -x : execute or enter into the slpm shell"
-  echo " -u : upgrade package"
-  echo " -i : install package (.tgz or pkgname)"
-  echo " -d : deinstall package"
-  echo " -c : clean package (-ci to clean + install)"
-  echo " -C : check checksum of pkg files (u=unmodified, m=modified)"
-  echo " -s : search package by keyword"
-  echo " -l : list installed packages or pkg files"
-  echo " -L : list all available packages (-LL for description)"
-  echo " -f : find missing libraries (-fi: install, -fl: list, -fd: remove)"
-  echo " -p : patch package"
-  echo " -P : unpatch package"
+  cat <<EOF
+Usage: slpm [-iudlLx] [pkg pkg ..]
+ -x : execute or enter into the slpm shell
+ -u : upgrade package
+ -i : install package (.tgz or pkgname)
+ -d : deinstall package
+ -c : clean package (-ci to clean + install)
+ -C : check checksum of pkg files (u=unmodified, m=modified)
+ -s : search package by keyword
+ -l : list installed packages or pkg files
+ -L : list all available packages (-LL for description)
+ -f : find missing libraries (-fi: install, -fl: list, -fd: remove)
+ -p : patch package
+ -P : unpatch package
+EOF
   exit 1
 }
 
@@ -514,6 +517,7 @@ pkg_open() {
   PKGINSTALL="${MAKE} install"
   PKGINSTALL_ARGS="DESTDIR=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX} exec_prefix=${PREFIX}"
   PKGCONFIGURE=""
+  CONFIGURE="./configure"
   BINPKG=0
   if [ -n "${REMOTE}" ]; then
     here=$(pwd)

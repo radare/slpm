@@ -1,0 +1,18 @@
+URL=http://www.lua.org/ftp/lua-5.2.0.tar.gz
+TYPE=tar
+DESC="LUA programming language"
+MAKEFUN=_luamake
+_luamake() {
+	${MAKE} posix
+}
+PKGINSTALL=_luainstall
+_luainstall() {
+	# HACK!
+	echo PREFIX=${PREFIX}
+	echo DESTDIR=${DESTDIR}
+	if [ "${DESTDIR}" = / ]; then
+		${MAKE} install INSTALL_TOP=${PREFIX}
+	else
+		${MAKE} install INSTALL_TOP=${DESTDIR}
+	fi
+}

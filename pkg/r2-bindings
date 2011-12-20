@@ -3,4 +3,4 @@ BASEDIR=swig
 TYPE=hg
 DEPS=radare2
 DESC="vala/swig bindings for radare2"
-CONFLICT="radare2-swig-0.7"
+CONFLICT="radare2-swig-0.9"

@@ -1,0 +1,7 @@
+URL=ftp://ftp.info-zip.org/pub/infozip/src/unzip60.tgz
+BASEDIR=unix
+TYPE=tar
+DESC="unzip uncompressor utility"
+PRECONFIGURE="touch man/funzip.1"
+PKGCONFIGURE="./configure"
+

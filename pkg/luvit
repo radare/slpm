@@ -1,0 +1,3 @@
+URL=git://github.com/luvit/luvit.git
+DESC="lua+libuv"
+TYPE=git
