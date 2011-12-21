@@ -10,6 +10,11 @@ install:
 	ln -fs $${PWD}/slpm-genpkg ${DESTDIR}${PREFIX}/bin/slpm-genpkg
 	ln -fs $${PWD}/slpm-genimg ${DESTDIR}${PREFIX}/bin/slpm-genimg
 
+uninstall deinstall:
+	rm -f ${DESTDIR}${PREFIX}/bin/slpm
+	rm -f ${DESTDIR}${PREFIX}/bin/slpm-genpkg
+	rm -f ${DESTDIR}${PREFIX}/bin/slpm-genimg
+
 dist:
 	rm -rf slpm-${VERSION}
 	hg clone . slpm-${VERSION}
