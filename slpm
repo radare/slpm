@@ -274,7 +274,7 @@ pkg_chksum() {
 
 pkg_register_chksum() {
   PKGNAME=$1
-  FILES=`cat $NFODIR/$PKG/files`
+  FILES=`cat $NFODIR/$PKGNAME/files`
   if [ -z "${FILES}" ]; then
     echo "Is this an empty package?"
     exit 1

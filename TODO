@@ -37,5 +37,8 @@ Experimental stuff to think on..
 
 do want packages:
 ================
- - zlib
+ - util-linux
+ - udev
+ - timezones
+ - mime / base64
 
