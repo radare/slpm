@@ -1,6 +1,0 @@
-URL=http://gcc.parentingamerica.com/releases/gcc-4.6.0/gcc-4.6.0.tar.bz2
-TYPE=tar
-DESC="gcc 4.6"
-DEPS="mpc"
-# --enable-go here!!
-CFGARGS="--enable-languages=c,c++,go"
