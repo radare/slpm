@@ -1,5 +1,8 @@
 # Configuration shellscript for slpm
 
+# On OSX
+#CC="gcc -arch i386"
+
 # for system wide use
 #DESTDIR="${ROOT}/_prefix"
 #PREFIX="/"
