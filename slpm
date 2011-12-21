@@ -139,6 +139,10 @@ tar_fetch() {
     *.tbz2|*.bz2) tar xjvf $FILE ; ;;
     *.xz) xz -d $FILE ; FILE2=`echo $FILE|sed -e s,.xz,,`; tar xvf $FILE2 ; ;;
     esac
+    if [ ! $? = 0 ]; then
+      echo "==> Error uncompressing"
+      exit 1
+    fi
   fi
 }
 
