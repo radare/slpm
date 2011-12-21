@@ -1,0 +1,3 @@
+URL=http://www.tcpdump.org/release/libpcap-1.2.0.tar.gz
+TYPE=tar
+DESC="Network packet capture library"

@@ -16,6 +16,7 @@ slpm
   - remove static libraries
   - remove development files
   - remove manpages
+  - strip binaries
 * TODO: rename all .*_executed as .*_done
 * Support to pass source pkgname with fullpath
   - Add support for other pkg repositories

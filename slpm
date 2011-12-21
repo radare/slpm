@@ -154,14 +154,14 @@ pkg_update() {
 pkg_patch() {
   if [ -n "${PATCHES}" ]; then
     pushd ${WRKDIR}/${PKG}/${BASEDIR} > /dev/null
-    if [ -e .patch_executed ]; then
+    if [ -e .slpm_patch_done ]; then
       echo "=> Patches already applied."
     else
       echo "=> Patching ${PKG}.."
       for a in ${PATCHES} ; do
         patch -p1 < ${PTXDIR}/${a}.patch
       done
-      :> .patch_executed
+      :> .slpm_patch_done
     fi
     popd > /dev/null
   fi
@@ -170,12 +170,12 @@ pkg_patch() {
 pkg_unpatch() {
   if [ -n "${PATCHES}" ]; then
     pushd ${WRKDIR}/${PKG}/${BASEDIR} >/dev/null
-    if [ -e .patch_executed ]; then
+    if [ -e .slpm_patch_done ]; then
       echo "=> Unpatching ${PKG}.."
       for a in ${PATCHES} ; do
         patch -R -p1 < ${PTXDIR}/${a}.patch
       done
-      rm -f .patch_executed
+      rm -f .slpm_patch_done
     else
       echo "=> Patches already not applied."
     fi
@@ -314,7 +314,6 @@ pkg_register() {
   #PKGINSTALL_ARGS="DESTDIR=${DESTDIR} INSTALL_ROOT=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX} exec_prefix=${PREFIX}"
   PKGINSTALL_ARGS="PREFIX=/ DESTDIR=${WRKDIR}/.tmp/${PKG} prefix=/ exec_prefix=${PREFIX}"
   for a in ${PKGINSTALL_ARGS} ; do
-  	echo export ${a}
   	eval export ${a}
   done
   eval ${PKGINSTALL} ${PKGINSTALL_ARGS}
@@ -618,7 +617,7 @@ fi
   if [ "${DODEPS}" = 1 ]; then
     for DEP in ${DEPS}; do
       if [ -z "`echo $a | $igncmd`" ]; then
-        printf "=> Checking dependency $DEP"
+        echo "=> Checking dependency $DEP"
         slpm -l | grep ${DEP}
         if [ $? = 0 ]; then
           echo "=> OK"
