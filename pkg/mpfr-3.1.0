@@ -1,0 +1,3 @@
+URL=http://www.mpfr.org/mpfr-current/mpfr-3.1.0.tar.xz
+TYPE=tar
+DESC="Multi precission math library"

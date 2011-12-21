@@ -15,6 +15,18 @@ uninstall deinstall:
 	rm -f ${DESTDIR}${PREFIX}/bin/slpm-genpkg
 	rm -f ${DESTDIR}${PREFIX}/bin/slpm-genimg
 
+pull:
+	wget http://lolcathost.org/slpm-${VERSION}.tar.gz
+	tar xzvf slpm-${VERSION}.tar.gz
+	cp slpm-${VERSION}/slpm .
+	cp slpm-${VERSION}/pkg/* pkg
+	rm -rf slpm-${VERSION}*
+
+push:
+	${MAKE} dist
+	pub slpm-${VERSION}.tar.gz
+
+
 dist:
 	rm -rf slpm-${VERSION}
 	hg clone . slpm-${VERSION}

@@ -1,0 +1,3 @@
+URL=http://llvm.org/releases/3.0/llvm-3.0.tar.gz
+TYPE=tar
+DESC="LLVM compiler infrastructure"
