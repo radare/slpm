@@ -277,13 +277,14 @@ pkg_register_chksum() {
   FILES=`cat $NFODIR/$PKGNAME/files`
   if [ -z "${FILES}" ]; then
     echo "Is this an empty package?"
-    exit 1
+    return 1
   fi
   ( cd ${DESTDIR}/${PREFIX}
     for a in `cat $NFODIR/$PKGNAME/files` ; do
       ${CHKSUM} "$a"
     done
   ) > $NFODIR/$PKGNAME/chksum
+  return 0
 }
 
 binpkg_register() {
@@ -347,6 +348,7 @@ pkg_register() {
     cp ${PKGDIR}/${PKG} slpm.nfo
     tar czf ${BINPKGDIR}/slpm-${PKG}.tgz *
     pkg_register_chksum ${PKG}
+    ret=$?
   else
     echo "==> WARNING: Package have installed no files"
     : > "$NFODIR/$PKG/files"
@@ -354,6 +356,10 @@ pkg_register() {
   date > "$NFODIR/$PKG/date"
   cp ${PKGDIR}/${PKG} $NFODIR/$PKG/slpm.nfo
   rm -rf "${WRKDIR}/.tmp/${PKG}"
+  if [ "$ret" = 1 ]; then
+    echo "==> Error registering checksums for pkg ${PKGNAME}"
+    exit 1
+  fi
 }
 
 pkg_clean() {
