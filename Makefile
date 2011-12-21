@@ -16,8 +16,9 @@ uninstall deinstall:
 	rm -f ${DESTDIR}${PREFIX}/bin/slpm-genimg
 
 pull:
-	wget http://lolcathost.org/slpm-${VERSION}.tar.gz
+	wget http://lolcathost.org/b/slpm-${VERSION}.tar.gz
 	tar xzvf slpm-${VERSION}.tar.gz
+	cp slpm-${VERSION}/Makefile .
 	cp slpm-${VERSION}/slpm .
 	cp slpm-${VERSION}/pkg/* pkg
 	rm -rf slpm-${VERSION}*
