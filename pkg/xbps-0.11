@@ -1,0 +1,4 @@
+URL=http://xbps.googlecode.com/files/xbps-0.11.tar.gz
+TYPE=tar
+DESC="the XBPS package system utilities"
+DEPS="zlib libarchive confuse"

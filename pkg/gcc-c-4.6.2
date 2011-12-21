@@ -1,0 +1,10 @@
+#URL=http://gcc.parentingamerica.com/releases/gcc-4.6.2/gcc-core-4.6.2.tar.bz2
+URL=http://gcc.parentingamerica.com/releases/gcc-4.6.2/gcc-4.6.2.tar.bz2
+PKGDIRNAME=gcc-4.6.2
+TYPE=tar
+DESC="GNU C compiler"
+DEPS="mpc"
+# --enable-go here!!
+# --enable-gcc must use:
+# http://gcc.parentingamerica.com/releases/gcc-4.6.2/gcc-g++-4.6.2.tar.bz2
+CFGARGS="--enable-languages=c"

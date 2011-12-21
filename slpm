@@ -143,6 +143,10 @@ tar_fetch() {
       echo "==> Error uncompressing"
       exit 1
     fi
+    if [ "${PKGDIRNAME}" -a ! "${PKG}" = "${PKGDIRNAME}" ]; then
+     # hack to rename PKGDIR
+      mv ${PKGDIRNAME} ${PKG}
+    fi
   fi
 }
 
@@ -550,6 +554,7 @@ pkg_open() {
   MAKEFUN=""
   CFGARGS=""
   BASEDIR=""
+  PKGDIRNAME=""
   INSTALL_POST="" # script to run after install
   PKGINSTALL="${MAKE} install"
   PKGINSTALL_ARGS="DESTDIR=${DESTDIR} INSTALL_ROOT=${DESTDIR} PREFIX=${PREFIX} prefix=${PREFIX} exec_prefix=${PREFIX}"

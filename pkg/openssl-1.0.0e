@@ -1,3 +1,11 @@
 URL=http://www.openssl.org/source/openssl-1.0.0e.tar.gz
 TYPE=tar
 DESC="OpenSSL library"
+PKGCONFIGURE=_foocfg
+_foocfg() {
+	./config --shared --prefix=${PREFIX}
+}
+PKGINSTALL=_fooinst
+_fooinst() {
+	make install INSTALL_PREFIX="${DESTDIR}" INSTALLTOP="${PREFIX}" OPENSSLDIR="${PREFIX}"
+}

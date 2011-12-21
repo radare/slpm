@@ -1,9 +1,6 @@
-package related issues
-======================
-* 9base has some warnings. push patch
-
 slpm
 ====
+* installation must be from the binpkg instead of running install twice
 * choose what to remove from installed packages
 	FILTER="doc dev man"
 	FILTER="/bin"
@@ -42,3 +39,6 @@ do want packages:
  - timezones
  - mime / base64
 
+package related issues
+======================
+* 9base has some warnings. push patch

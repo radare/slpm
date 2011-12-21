@@ -1,0 +1,3 @@
+URL=git://github.com/tanoku/sundown.git
+TYPE=git
+DESC="sundown markdown parser"

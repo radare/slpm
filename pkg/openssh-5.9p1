@@ -1,0 +1,4 @@
+URL=http://openbsd.org.ar/pub/OpenBSD/OpenSSH/portable/openssh-5.9p1.tar.gz
+TYPE=tar
+DESC="openssh client and server"
+DEPS="zlib openssl"
