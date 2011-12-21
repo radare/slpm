@@ -321,10 +321,10 @@ pkg_register() {
   DD=${WRKDIR}/.tmp/${PKG}
   eval DESTDIR=${DD} INSTALL_ROOT=${DD}  \
     ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" prefix=/
-    if [ ! $? = 0 ]; then
-      echo "=> Install fail"
-      exit 1
-    fi
+    #-if [ ! $? = 0 ]; then
+    #-  echo "=> Install fail"
+    #-  exit 1
+    #-fi
 #"prefix=${WRKDIR}/.tmp/${PKG}"
 ## XXX: dupped from pkg_install
     if [ -n "${INSTALL_POST}" ]; then
