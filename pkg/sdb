@@ -1,0 +1,3 @@
+URL=git://github.com/radare/sdb
+TYPE=git
+DESC="Simple DataBase"

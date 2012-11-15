@@ -11,7 +11,7 @@
 PREFIX="${ROOT}/_prefix"
 DESTDIR="/"
 
-WGET="wget -c"
+WGET="wget --no-check-certificate -c"
 REMOTE= #http://nopcode.org/slpm
 
 #PREFIX="/usr"
@@ -35,4 +35,4 @@ EXTRA_CFGARGS=""
 SYSDEPS=""
 IGNDIRS="/usr/share/locale /usr/share/doc"
 
-export CFLAGS LDFLAGS EXTRA_CFGARGS CHKSUM IGNDIRS
+export WGET CFLAGS LDFLAGS EXTRA_CFGARGS CHKSUM IGNDIRS

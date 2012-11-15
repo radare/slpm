@@ -1,0 +1,4 @@
+TYPE=tar
+URL=http://download.savannah.gnu.org/releases/man-db/man_db-2.3.20.tar.gz
+DESC="man pages"
+DEPS="gdbm"

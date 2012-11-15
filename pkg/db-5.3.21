@@ -1,0 +1,3 @@
+URL=http://download.oracle.com/berkeley-db/db-5.3.21.tar.gz
+TYPE=tar
+DESC="Oracle DataBase"

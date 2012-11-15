@@ -16,7 +16,7 @@ lslibs() {
   cd ${PREFIX}
   export DYLD_LIBRARY_PATH=${PREFIX}/lib
   export LD_LIBRARY_PATH=${PREFIX}/lib
-  for bin in `find bin usr/bin` ; do
+  for bin in `find bin usr/bin sbin usr/sbin 2>/dev/null` ; do
     [ ! -f $bin ] && continue
     [ ! -x $bin ] && continue
     if [ -e /usr/bin/otool ]; then
@@ -28,13 +28,13 @@ lslibs() {
 }
 
 fixlibs() {
- libs=$(lslibs |sort |uniq)
- for a in $libs ; do
-   ba=$(basename $a)
-   if [ ! -e "${PREFIX}/lib/$ba" ]; then
-     echo $a
-   fi
- done
+  libs=$(lslibs |sort |uniq)
+  for a in $libs ; do
+    ba=$(basename $a)
+    if [ ! -e "${PREFIX}/lib/$ba" ]; then
+      echo $a
+    fi
+  done
 }
 
 BIN="`readlink $0`"
@@ -48,6 +48,7 @@ WRKDIR="${ROOT}/_work"
 TMPDIR="${ROOT}/_work/tmp"
 PKGDIR="${ROOT}/pkg"
 PTXDIR="${ROOT}/patches"
+RMVDIR="${ROOT}/_removed"
 BINPKGDIR="${ROOT}/binpkg"
 MAKE=make
 mkdir -p "${TMPDIR}"
@@ -128,9 +129,10 @@ tar_fetch() {
   if [ -f "$WRKDIR/$FILE" ]; then
     echo "==> Already downloaded $FILE"
   else
-    wget --no-check-certificate -c $URL
+    [ -z "${WGET}" ] && WGET="wget --no-check-certificate -c"
+    ${WGET} ${URL} || exit 1
   fi
-  if [ -d "$WRKDIR/$PKG" ]; then
+  if [ -f "$WRKDIR/$PKG/.slpm_workdir_done" ]; then
     echo "==> Already uncompressed and patched $PKG"
   else
     case "$FILE" in
@@ -143,6 +145,7 @@ tar_fetch() {
       echo "==> Error uncompressing"
       exit 1
     fi
+    :> "$WRKDIR/$PKG/.slpm_workdir_done"
     if [ "${PKGDIRNAME}" -a ! "${PKG}" = "${PKGDIRNAME}" ]; then
      # hack to rename PKGDIR
       mv ${PKGDIRNAME} ${PKG}
@@ -329,7 +332,7 @@ pkg_register() {
   echo "=> Running ${PKGINSTALL} ${PKGINSTALL_ARGS}"
   DD=${WRKDIR}/.tmp/${PKG}
   eval DESTDIR=${DD} INSTALL_ROOT=${DD}  \
-    ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" prefix=/
+    ${PKGINSTALL} PREFIX=/ "DESTDIR=${WRKDIR}/.tmp/${PKG}" prefix=/ || exit 1
     #-if [ ! $? = 0 ]; then
     #-  echo "=> Install fail"
     #-  exit 1
@@ -441,9 +444,60 @@ exec_shell() {
 mkdir -p "${NFODIR}" "${WRKDIR}" "${BINPKGDIR}"
 [ ! -e "${NFODIR}/.fixedlibs" ] && touch ${NFODIR}/.fixedlibs
 
+remove_list() {
+  # broken symlinks .. try to fix them?
+  # manpages
+  echo ${PREFIX}/share/man
+  echo ${PREFIX}/man
+  # MYSELF echo ${PREFIX}/var/lib/slpm
+  echo ${PREFIX}/share/info
+  echo ${PREFIX}/share/doc
+  # devel
+  echo ${PREFIX}/include
+  echo ${PREFIX}/lib/*.a
+  echo ${PREFIX}/lib/*.la
+  echo ${PREFIX}/lib/pkgconfig
+  echo ${PREFIX}/share/vala/vapi
+}
+
+remove_move() {
+  for a in `remove_list` ; do
+    if [ ! -e "$a" ]; then
+      continue
+    fi
+    d=`dirname "$a" | sed -e s,${PREFIX},${RMVDIR},`
+    mkdir -p "$d"
+    if [ -d "$a" ]; then
+      n=`basename $a`
+      cp -rf $a/* "$d/$n/"
+      rm -rf "$a"
+      echo "$d/$n/"
+    else
+      n=`basename $a`
+      echo "$d/$n"
+      mv -f "$a" "$d"
+    fi
+  done
+}
+
+remove_install() {
+  if [ -d "${RMVDIR}" -a -d "${RMVDIR}" ]; then
+    cp -rf ${RMVDIR}/* ${PREFIX}/
+  fi
+}
+
+remove_empty() {
+  # find empty directories and kill them all
+  find ${PREFIX} -type d -empty -exec rmdir {} \;
+}
+
 DO=
 while [ -n "$1" ]; do
   case "$1" in
+  -r) remove_list "$@" ; exit 0 ; ;;
+  -re) remove_empty ; exit 0 ; ;;
+  -rm) remove_move "$@" ; exit 0 ; ;;
+  -ri) remove_install "$2" ; exit 0 ; ;;
   -f) fixlibs ; exit 0 ; ;;
   -fi)
     mkdir -p ${DESTDIR}/${PREFIX}/lib
@@ -585,23 +639,23 @@ pkg_open() {
     return
   fi
 
-# hack to support to uninstall packages without finding the pkg description
-# XXX this needs to be fixed
-if [ "$DO" = "-d" ]; then
-  if [ -f "$NFODIR/$PKG/slpm.nfo" ]; then
-    . "${NFODIR}/$PKG/slpm.nfo"
-  else
-    PKG2=`basename $NFODIR/$PKG* 2> /dev/null` # autocomplete
-    if [ -f "$NFODIR/$PKG2/slpm.nfo" ]; then
-      . "${NFODIR}/${PKG2}/slpm.nfo"
-      PKG=$PKG2
+  # hack to support to uninstall packages without finding the pkg description
+  # XXX this needs to be fixed
+  if [ "$DO" = "-d" ]; then
+    if [ -f "$NFODIR/$PKG/slpm.nfo" ]; then
+      . "${NFODIR}/$PKG/slpm.nfo"
     else
-      echo "Cannot find $PKG"
-      exit 1
+      PKG2=`basename $NFODIR/$PKG* 2> /dev/null` # autocomplete
+      if [ -f "$NFODIR/$PKG2/slpm.nfo" ]; then
+        . "${NFODIR}/${PKG2}/slpm.nfo"
+        PKG=$PKG2
+      else
+        echo "Cannot find $PKG"
+        exit 1
+      fi
     fi
+    return
   fi
-  return
-fi
 
   if [ ! -f "$PKGDIR/$PKG" ]; then
     PKG2=`basename $PKGDIR/$PKG* 2> /dev/null` # autocomplete
