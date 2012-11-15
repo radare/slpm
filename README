@@ -1,8 +1,0 @@
-SLPM: suck-less package manage
-==============================
-
-Notes
------
-On OS you would probably want to set:
-   export CC="gcc -arch i386"
-to avoid linking issues
