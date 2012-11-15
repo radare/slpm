@@ -1,6 +1,6 @@
-URL=http://radare.org/hg/radare2
-BASEDIR=swig
-TYPE=hg
+URL=git://github.com/radare/radare2
+BASEDIR=r2-bindings
+TYPE=git
 DEPS=radare2
 DESC="vala/swig bindings for radare2"
 CONFLICT="radare2-swig-0.9"

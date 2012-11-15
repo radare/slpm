@@ -638,7 +638,7 @@ fi
           echo "=> OK"
         else
           echo "=> Not found. Installing pkg..."
-          slpm -i ${DEP}
+          slpm -i ${DEP} || exit 1
         fi
         continue
       fi
@@ -669,6 +669,7 @@ while [ -n "$1" ]; do
         (binpkg_install)
       else
         (pkg_fetch) && (pkg_patch) && (pkg_build) && (pkg_install) 
+        exit $? # honor return code
       fi ; ;;
   -u) (pkg_fetch 1) && (pkg_clean) ; (pkg_build) && (pkg_install) ; ;;
   -d) (pkg_deinstall) ; ;;

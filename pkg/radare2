@@ -1,4 +1,4 @@
 DESC="advanced hexadecimal editor and debugger (2nd version)"
-URL=http://radare.org/hg/radare2
-TYPE=hg
-CONFLICT="radare2-0.9"
+URL=git://github.com/radare/radare2
+TYPE=git
+CONFLICT="radare2-0.9.2 radare2-0.9"

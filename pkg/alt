@@ -1,3 +1,3 @@
-URL=http://hg.youterm.com/alt
+URL=git://github.com/radare/alt
 DESC="Abstract Language Tree"
-TYPE=hg
+TYPE=git
