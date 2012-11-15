@@ -128,7 +128,7 @@ tar_fetch() {
   if [ -f "$WRKDIR/$FILE" ]; then
     echo "==> Already downloaded $FILE"
   else
-    wget -c $URL
+    wget --no-check-certificate -c $URL
   fi
   if [ -d "$WRKDIR/$PKG" ]; then
     echo "==> Already uncompressed and patched $PKG"
