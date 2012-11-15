@@ -22,7 +22,8 @@ lslibs() {
     if [ -e /usr/bin/otool ]; then
       otool -L $bin | grep -v :|awk '{print $1}'
     else
-      ldd $bin | cut -d '>' -f 2- |cut -c 2-| grep ^/ | cut -d ' ' -f 1 | grep -v ${PREFIX}
+      ldd $bin | cut -d '>' -f 2- |cut -c 2-| \
+        grep ^/ | cut -d ' ' -f 1 | grep -v ${PREFIX}
     fi
   done
 }
@@ -400,10 +401,13 @@ Usage: slpm [-iudlLx] [pkg pkg ..]
  -d : deinstall package
  -c : clean package (-ci to clean + install)
  -C : check checksum of pkg files (u=unmodified, m=modified)
+ -r : remove devel/man/doc files to _remove/
+      -r: list, -ri: reinstall, -rm: remove
  -s : search package by keyword
  -l : list installed packages or pkg files
  -L : list all available packages (-LL for description)
- -f : find missing libraries (-fi: install, -fl: list, -fd: remove)
+ -f : find missing libraries
+      -fi: install, -fl: list, -fd: remove
  -p : patch package
  -P : unpatch package
 EOF
