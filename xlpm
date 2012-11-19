@@ -1,0 +1,56 @@
+#!/bin/sh
+# xbps on top of slpm wrapper
+
+whereami() {
+  for a in $PWD `echo $PATH | sed 's,:, ,g'` ; do
+    if [ -e "$a/$1" ]; then
+      echo "$a/$1"
+      return
+    fi
+  done
+  echo $1
+}
+BIN="`readlink $0`"
+ARG0="`whereami $BIN`"
+ROOT="`dirname $ARG0`"
+ROOTDIR="${ROOT}/_xbps"
+
+show_help() {
+  echo "Usage: xlpm [-action] [args]"
+  echo "  -i [pkgname]   install package"
+  echo "  -r [pkgname]   remove package"
+  echo "  -s [pkgname]   search package"
+  echo "  -l [pkgname]   list packages or files"
+  echo "  -v             show version"
+  exit 0
+}
+[ -z "$1" ] && show_help
+while [ -n "$1" ]; do
+	case "$1" in
+	-h)
+		show_help
+		;;
+	-i)
+		shift
+		exec slpm -x xbps-install -r ${ROOTDIR} -y $@
+		;;
+	-s)
+		shift
+		exec slpm -x xbps-query -r ${ROOTDIR} -s $@
+		;;
+	-l)
+		if [ -n "$2" ]; then
+			exec slpm -x xbps-query -r ${ROOTDIR} -f "$2"
+		fi
+		exec slpm -x xbps-query -r ${ROOTDIR} -l |awk '{print $1}'
+		;;
+	-r)
+		shift
+		exec slpm -x xbps-remove -r ${ROOTDIR} -y $@
+		;;
+	-v)
+		exec slpm -x xbps-install -V
+		;;
+	esac
+	shift
+done

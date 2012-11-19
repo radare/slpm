@@ -1,5 +1,5 @@
 #!/bin/sh
-# suckless package manager @ 2009-2011
+# suckless package manager @ 2009-2012
 # - pancake at nopcode dot org
 
 whereami() {

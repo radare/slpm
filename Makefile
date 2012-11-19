@@ -1,12 +1,13 @@
-VERSION=0.1
+VERSION=0.2
 PREFIX?=/usr
 DESTDIR?=
 
 all:
 
-install:
+symstall install:
 	mkdir -p ${DESTDIR}${PREFIX}/bin
 	ln -fs $${PWD}/slpm ${DESTDIR}${PREFIX}/bin/slpm
+	ln -fs $${PWD}/xlpm ${DESTDIR}${PREFIX}/bin/xlpm
 	ln -fs $${PWD}/slpm-genpkg ${DESTDIR}${PREFIX}/bin/slpm-genpkg
 	ln -fs $${PWD}/slpm-genimg ${DESTDIR}${PREFIX}/bin/slpm-genimg
 
@@ -26,7 +27,6 @@ pull:
 push:
 	${MAKE} dist
 	pub slpm-${VERSION}.tar.gz
-
 
 dist:
 	rm -rf slpm-${VERSION}
