@@ -1,0 +1,4 @@
+URL=git://github.com/xtraeme/xbps.git
+TYPE=git
+DESC="the x binary package system"
+DEPS="zlib libarchive confuse"
