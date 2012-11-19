@@ -1,0 +1,8 @@
+DESC="http proxy with support for socks"
+URL=git://git.wifi.pps.jussieu.fr/polipo
+TYPE=git
+PKGINSTALL=_polipoinstall
+_polipoinstall() {
+        ${MAKE} install TARGET=${DESTDIR} \
+		PREFIX=${PREFIX} LOCAL_ROOT=${PREFIX}/tmp
+}
