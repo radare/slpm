@@ -1,3 +1,4 @@
 URL=http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
 TYPE=tar
 DESC="GNU international charset conversion library"
+PATCHES=libiconv-114
