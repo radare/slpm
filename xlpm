@@ -21,12 +21,22 @@ show_help() {
   echo "  -r [pkgname]   remove package"
   echo "  -s [pkgname]   search package"
   echo "  -l [pkgname]   list packages or files"
+  echo "  -c             clear binpkgs, orphans.."
+  echo "  -x [cmd]       enter chroot or run command"
   echo "  -v             show version"
   exit 0
 }
 [ -z "$1" ] && show_help
 while [ -n "$1" ]; do
 	case "$1" in
+	-x)
+		shift
+		if [ -z "$1" ]; then
+			sudo chroot ${ROOTDIR}
+		else
+			sudo chroot ${ROOTDIR} $@
+		fi
+		;;
 	-h)
 		show_help
 		;;
@@ -47,6 +57,9 @@ while [ -n "$1" ]; do
 	-r)
 		shift
 		exec slpm -x xbps-remove -r ${ROOTDIR} -y $@
+		;;
+	-c)
+		slpm -x xbps-remove -Ooyv -r ${ROOTDIR}
 		;;
 	-v)
 		exec slpm -x xbps-install -V
