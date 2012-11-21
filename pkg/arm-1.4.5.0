@@ -1,0 +1,4 @@
+URL=http://www.atagar.com/arm/resources/static/arm-1.4.5.0.tar.bz2
+DESC="Anonymizing Relay Monitor"
+PKGDIRNAME=arm
+TYPE=tar
