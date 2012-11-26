@@ -1,0 +1,4 @@
+URL=git://git.gnome.org/libgit2-glib
+TYPE=git
+DESC="GObject bindings for libgit2"
+DEPS="libgit2"

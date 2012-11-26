@@ -205,6 +205,9 @@ pkg_build() {
     if [ -n "${PRECONFIGURE}" ]; then
       ${PRECONFIGURE}
     fi
+    if [ -f "autogen.sh" -a ! -f "configure" -a -z "${PKGCONFIGURE}" ]; then
+      PKGCONFIGURE="sh autogen.sh --prefix=${PREFIX}"
+    fi
     if [ -n "${PKGCONFIGURE}" ]; then
       ${PKGCONFIGURE}
     else
@@ -212,12 +215,16 @@ pkg_build() {
         python setup.py build
         :> .slpm_build_done
       else
-        [ -f ${CONFIGURE} ] && chmod +x ${CONFIGURE}
-        if [ -x "${CONFIGURE}" ]; then
-          ${CONFIGURE} "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
-          if [ ! $? = 0 ]; then
-            echo "=> Configure stage failed :("
-            exit 1
+        if [ -f "CMakeLists.txt" ]; then
+          cmake .  -DCMAKE_INSTALL_PREFIX=${PREFIX}
+	else
+          [ -f ${CONFIGURE} ] && chmod +x ${CONFIGURE}
+          if [ -x "${CONFIGURE}" ]; then
+            ${CONFIGURE} "--prefix=${PREFIX}" ${CFGARGS} ${USER_CFGARGS}
+            if [ ! $? = 0 ]; then
+              echo "=> Configure stage failed :("
+              exit 1
+            fi
           fi
         fi
       fi
@@ -254,6 +261,9 @@ pkg_install() {
     if [ -f setup.py ]; then
       ${PYTHON} setup.py install --root "${DESTDIR}/${PREFIX}"
     else
+      #if [ -f CMakeLists.txt ]; then
+      #  PKGINSTALL_ARGS="DESTDIR=${PREFIX}"
+      #fi
       echo "=> Running: ${PKGINSTALL} ${PKGINSTALL_ARGS}"
       for a in ${PKGINSTALL_ARGS} ; do
     	eval export ${a}

@@ -1,4 +1,0 @@
-URL=http://hg.youterm.com/valaswig
-TYPE=hg
-DESC="vala to swig interface translator"
-DEPS="swig vala"
