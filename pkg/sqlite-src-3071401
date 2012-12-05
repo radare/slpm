@@ -1,0 +1,4 @@
+#URL=http://www.sqlite.org/sqlite-src-3070900.zip
+URL=http://www.sqlite.org/sqlite-src-3071401.zip
+TYPE=tar
+DESC="sqlite3"
