@@ -1,0 +1,4 @@
+URL=http://pkgconfig.freedesktop.org/releases/pkg-config-0.28.tar.gz
+DESC="pkg config tool"
+CFGARGS=--with-internal-glib
+TYPE=tar

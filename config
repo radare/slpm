@@ -32,7 +32,7 @@ MAKEFLAGS="-j4"
 EXTRA_CFGARGS=""
 
 # TODO: user-defined-per-package cflags or extra-cfgargs
-SYSDEPS=""
+SYSDEPS="gettext glib"
 IGNDIRS="/usr/share/locale /usr/share/doc"
 
 export WGET CFLAGS LDFLAGS EXTRA_CFGARGS CHKSUM IGNDIRS

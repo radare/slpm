@@ -1,4 +1,4 @@
-URL=http://download.gnome.org/sources/vala/0.18/vala-0.26.0.tar.xz
+URL=http://download.gnome.org/sources/vala/0.26/vala-0.26.0.tar.xz
 TYPE=tar
 DESC="Vala and Genie programming langauge compiler"
 DEPS=glib

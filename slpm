@@ -66,7 +66,7 @@ fi
 NFODIR="${DESTDIR}/${PREFIX}/var/lib/slpm/pkg"
 BINPKG=0
 if [ -n "${SYSDEPS}" ]; then
-  igncmd="grep -v $(echo "-e$SYSDEPS" | sed -e 's, , -e,g')"
+  igncmd="grep $(echo "-e$SYSDEPS" | sed -e 's, , -e,g')"
 else
   igncmd="cat"
 fi
@@ -714,7 +714,7 @@ pkg_open() {
   fi
   if [ "${DODEPS}" = 1 ]; then
     for DEP in ${DEPS}; do
-      if [ -z "`echo $a | $igncmd`" ]; then
+      if [ -z "`echo $DEP | $igncmd`" ]; then
         echo "=> Checking dependency $DEP"
         slpm -l | grep ${DEP}
         if [ $? = 0 ]; then
@@ -723,6 +723,9 @@ pkg_open() {
           echo "=> Not found. Installing pkg..."
           slpm -i ${DEP} || exit 1
         fi
+        continue
+      else
+        echo "=> Asuming $DEP is a system package"
         continue
       fi
       if [ ! -e "${NFODIR}/${DEP}" ]; then
