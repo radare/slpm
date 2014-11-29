@@ -41,6 +41,7 @@ fixlibs() {
 BIN="`readlink $0`"
 [ -z "${BIN}" ] && BIN=$0
 [ -z "${BIN}" ] && BIN=/bin/sh # XXX?
+PATH=`whereami`:${PATH}
 ARG0="`whereami $BIN`"
 ROOT="`dirname $ARG0`"
 IGNEXE=0
