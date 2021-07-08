@@ -1,4 +1,4 @@
-SLPM: suck-less package manage
+SLPM: suck-less package manager
 ==============================
 
 Simple package manager that work on many *nix like operating systems.
